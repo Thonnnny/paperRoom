@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/components/product_card.dart';
-import 'package:freshbuyer/model/popular.dart';
+import 'package:freshbuyer/constants.dart';
+import 'package:freshbuyer/helpers/base_client.dart';
+import 'package:freshbuyer/helpers/res_apis.dart';
+import 'package:freshbuyer/model/productResponse.dart';
 import 'package:freshbuyer/screens/detail/detail_screen.dart';
 import 'package:freshbuyer/screens/home/hearder.dart';
 import 'package:freshbuyer/screens/home/most_popular.dart';
@@ -8,6 +13,8 @@ import 'package:freshbuyer/screens/home/search_field.dart';
 import 'package:freshbuyer/screens/home/special_offer.dart';
 import 'package:freshbuyer/screens/mostpopular/most_popular_screen.dart';
 import 'package:freshbuyer/screens/special_offers/special_offers_screen.dart';
+
+import '../../model/productElement.dart';
 
 class HomeScreen extends StatefulWidget {
   final String title;
@@ -20,37 +27,62 @@ class HomeScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _HomeScreenState();
 }
 
+Future<List<Product>> _getProductItems() async {
+  final response = await BaseClient()
+      .get(RestApis.apiProducts, {"Content-Type": "application/json"});
+
+  print("******************************************************response");
+  print(response);
+
+  final productResponse = ProductResponse.fromJson(jsonDecode(response));
+  return productResponse.products;
+}
+
+@override
+void initState() {
+  _getProductItems();
+}
+
 class _HomeScreenState extends State<HomeScreen> {
-  late final datas = homePopularProducts;
+  late final datas = _getProductItems();
 
   @override
   Widget build(BuildContext context) {
-    const padding = EdgeInsets.fromLTRB(24, 24, 24, 0);
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          const SliverPadding(
-            padding: EdgeInsets.only(top: 24),
-            sliver: SliverAppBar(
-              pinned: true,
-              flexibleSpace: HomeAppBar(),
-            ),
-          ),
-          SliverPadding(
-            padding: padding,
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                ((context, index) => _buildBody(context)),
-                childCount: 1,
+    const padding = EdgeInsets.fromLTRB(20, 20, 10, 0);
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: color4,
+        body: CustomScrollView(
+          scrollDirection: Axis.vertical,
+          slivers: <Widget>[
+            const SliverPadding(
+              padding: EdgeInsets.only(top: 0),
+              sliver: SliverAppBar(
+                elevation: 30,
+                centerTitle: true,
+                backgroundColor: color5,
+                iconTheme: IconThemeData(color: Colors.white, size: 34),
+                pinned: true,
+                flexibleSpace: HomeAppBar(),
               ),
             ),
-          ),
-          SliverPadding(
-            padding: padding,
-            sliver: _buildPopulars(),
-          ),
-          const SliverAppBar(flexibleSpace: SizedBox(height: 24))
-        ],
+            SliverPadding(
+              padding: padding,
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  ((context, index) => _buildBody(context)),
+                  childCount: 1,
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: padding,
+              sliver: _buildPopulars(),
+            ),
+
+            //const SliverAppBar(flexibleSpace: SizedBox(height: 24))
+          ],
+        ),
       ),
     );
   }
@@ -72,20 +104,43 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildPopulars() {
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 185,
-        mainAxisSpacing: 24,
-        crossAxisSpacing: 16,
-        mainAxisExtent: 285,
+        mainAxisExtent: 600,
+        maxCrossAxisExtent: 400,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
       ),
-      delegate: SliverChildBuilderDelegate(_buildPopularItem, childCount: 30),
+      delegate: SliverChildBuilderDelegate(_buildPopularItem, childCount: 1),
     );
   }
 
   Widget _buildPopularItem(BuildContext context, int index) {
-    final data = datas[index % datas.length];
-    return ProductCard(
-      data: data,
-      ontap: (data) => Navigator.pushNamed(context, ShopDetailScreen.route()),
+    return FutureBuilder<List<Product>>(
+      future: _getProductItems(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                  child: Stack(
+                    children: <Widget>[
+                      ProductCard(
+                        data: snapshot.data![index],
+                      )
+                    ],
+                  ),
+                  onTap: () => Navigator.pushNamed(context,
+                      ShopDetailScreen.route(snapshot.data![index].id)));
+            },
+            itemCount: snapshot.data!.length,
+          );
+        } else if (snapshot.hasError) {
+          return Text("${snapshot.error}");
+        }
+        return const CircularProgressIndicator();
+      },
     );
   }
 

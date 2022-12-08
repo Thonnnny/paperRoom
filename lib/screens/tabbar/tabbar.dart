@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:freshbuyer/cart/cart_screen.dart';
+import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/image_loader.dart';
 import 'package:freshbuyer/screens/home/home.dart';
 import 'package:freshbuyer/screens/profile/profile_screen.dart';
 import 'package:freshbuyer/screens/test/test_screen.dart';
 import 'package:freshbuyer/size_config.dart';
 
+import '../wallet/wallet_screen.dart';
+
 class TabbarItem {
   final String lightIcon;
   final String boldIcon;
   final String label;
 
-  TabbarItem({required this.lightIcon, required this.boldIcon, required this.label});
+  TabbarItem(
+      {required this.lightIcon, required this.boldIcon, required this.label});
 
   BottomNavigationBarItem item(bool isbold) {
     return BottomNavigationBarItem(
@@ -37,9 +42,9 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
     const HomeScreen(
       title: '首页0',
     ),
-    const TestScreen(title: 'Cart'),
+    const CartScreen(),
     const TestScreen(title: 'Orders'),
-    const TestScreen(title: 'Wallet'),
+    const WalletScreen(),
     const ProfileScreen(),
   ];
 
@@ -48,6 +53,7 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
       '${ImageLoader.rootPaht}/tabbar/$path',
       width: 24,
       height: 24,
+      color: color5,
     );
   }
 
@@ -55,27 +61,27 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
     BottomNavigationBarItem(
       icon: generateIcon('light/Home@2x.png'),
       activeIcon: generateIcon('bold/Home@2x.png'),
-      label: 'Home',
+      label: 'Inicio',
     ),
     BottomNavigationBarItem(
       icon: generateIcon('light/Bag@2x.png'),
       activeIcon: generateIcon('bold/Bag@2x.png'),
-      label: 'Cart',
+      label: 'Carrito',
     ),
     BottomNavigationBarItem(
       icon: generateIcon('light/Buy@2x.png'),
       activeIcon: generateIcon('bold/Buy@2x.png'),
-      label: 'Orders',
+      label: 'Ordenes',
     ),
     BottomNavigationBarItem(
       icon: generateIcon('light/Wallet@2x.png'),
       activeIcon: generateIcon('bold/Wallet@2x.png'),
-      label: 'Wallet',
+      label: 'Billetera',
     ),
     BottomNavigationBarItem(
       icon: generateIcon('light/Profile@2x.png'),
       activeIcon: generateIcon('bold/Profile@2x.png'),
-      label: 'Profile',
+      label: 'Perfil',
     ),
   ];
 
@@ -87,23 +93,27 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    return Scaffold(
-      body: screens[_select],
-      bottomNavigationBar: BottomNavigationBar(
-        items: items,
-        onTap: ((value) => setState(() => _select = value)),
-        currentIndex: _select,
-        selectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 10,
+    return Container(
+      color: color3,
+      child: Scaffold(
+        body: screens[_select],
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: color3,
+          items: items,
+          onTap: ((value) => setState(() => _select = value)),
+          currentIndex: _select,
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 10,
+          ),
+          showUnselectedLabels: false,
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.normal,
+            fontSize: 10,
+          ),
+          selectedItemColor: color5,
+          unselectedItemColor: color5,
         ),
-        showUnselectedLabels: true,
-        unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: 10,
-        ),
-        selectedItemColor: const Color(0xFF212121),
-        unselectedItemColor: const Color(0xFF9E9E9E),
       ),
     );
   }

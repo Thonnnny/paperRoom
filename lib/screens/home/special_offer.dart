@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/components/special_offer_widget.dart';
-import 'package:freshbuyer/model/category.dart';
+import 'package:freshbuyer/constants.dart';
+import 'package:freshbuyer/model/oldCategory.dart';
 import 'package:freshbuyer/model/special_offer.dart';
 import 'package:freshbuyer/screens/mostpopular/most_popular_screen.dart';
 
@@ -30,7 +31,7 @@ class _SpecialOffersState extends State<SpecialOffers> {
           Container(
             height: 181,
             decoration: const BoxDecoration(
-              color: Color(0xFFE7E7E7),
+              color: color5,
               borderRadius: BorderRadius.all(Radius.circular(32)),
             ),
             child: PageView.builder(
@@ -62,17 +63,23 @@ class _SpecialOffersState extends State<SpecialOffers> {
           itemBuilder: ((context, index) {
             final data = categories[index];
             return GestureDetector(
-              onTap: () => Navigator.pushNamed(context, MostPopularScreen.route()),
+              onTap: () =>
+                  Navigator.pushNamed(context, MostPopularScreen.route()),
               child: Column(
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0x10101014),
+                      color: color5,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Image.asset(data.icon, width: 28, height: 28),
+                      child: Image.asset(
+                        data.icon,
+                        width: 35,
+                        height: 35,
+                        color: color3,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -80,7 +87,9 @@ class _SpecialOffersState extends State<SpecialOffers> {
                     child: Text(
                       data.title,
                       style: const TextStyle(
-                          color: Color(0xff424242), fontWeight: FontWeight.bold, fontSize: 16),
+                          color: color2,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
                     ),
                   ),
                 ],
@@ -98,14 +107,16 @@ class _SpecialOffersState extends State<SpecialOffers> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const Text(
-          'Special Offers',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Color(0xFF212121)),
+          'Ofertas especiales',
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 20, color: color2),
         ),
         TextButton(
           onPressed: () => widget.onTapSeeAll?.call(),
           child: const Text(
-            'See All',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF212121)),
+            'Ver Todo',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: color6),
           ),
         ),
       ],
@@ -137,7 +148,7 @@ class _SpecialOffersState extends State<SpecialOffers> {
         width: isActive ? 16 : 4.0,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(2)),
-          color: isActive ? const Color(0XFF101010) : const Color(0xFFBDBDBD),
+          color: isActive ? color6 : color2,
         ),
       ),
     );

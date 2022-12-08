@@ -1,18 +1,31 @@
 class Category {
-  const Category(this.icon, this.title, this.id);
+  Category({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.createdAt,
+    required this.v,
+  });
 
-  final String icon;
-  final String title;
-  final String id;
+  String id;
+  String name;
+  String description;
+  DateTime createdAt;
+  int v;
+
+  factory Category.fromJson(Map<String, dynamic> json) => Category(
+        id: json["_id"],
+        name: json["name"],
+        description: json["description"],
+        createdAt: DateTime.parse(json["createdAt"]),
+        v: json["__v"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "name": name,
+        "description": description,
+        "createdAt": createdAt.toIso8601String(),
+        "__v": v,
+      };
 }
-
-final homeCategries = <Category>[
-  const Category('assets/icons/category_sofa@2x.png', 'Sofa', 'sofa'),
-  const Category('assets/icons/category_chair@2x.png', 'Chair', 'sofa'),
-  const Category('assets/icons/category_table@2x.png', 'Table', 'sofa'),
-  const Category('assets/icons/category_kitchen@2x.png', 'Kitchen', 'sofa'),
-  const Category('assets/icons/category_lamp@2x.png', 'Lamp', 'sofa'),
-  const Category('assets/icons/category_cupboard@2x.png', 'Cupboard', 'sofa'),
-  const Category('assets/icons/category_vase@2x.png', 'Vase', 'sofa'),
-  const Category('assets/icons/category_others@2x.png', 'Others', 'sofa'),
-];

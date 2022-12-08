@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:freshbuyer/constants.dart';
 
 import '../model/special_offer.dart';
 
@@ -28,17 +29,20 @@ class SpecialOfferWidget extends StatelessWidget {
               children: [
                 Text(
                   data.discount,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 40),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 40, color: color6),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   data.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 18, color: color2),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   data.detail,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 12, color: color2),
                 ),
               ],
             ),

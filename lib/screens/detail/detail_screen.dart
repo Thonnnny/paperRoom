@@ -1,11 +1,22 @@
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
+
+import 'package:freshbuyer/orders/details_order.dart';
 import 'package:freshbuyer/size_config.dart';
 
-class ShopDetailScreen extends StatefulWidget {
-  const ShopDetailScreen({super.key});
+import '../../constants.dart';
+import '../../model/productElement.dart';
 
-  static String route() => '/shop_detail';
+// ignore: must_be_immutable
+class ShopDetailScreen extends StatefulWidget {
+  const ShopDetailScreen({
+    super.key,
+    required this.data,
+  });
+
+  static String route(String id) => '/shop_detail';
+  // ignore: prefer_typing_uninitialized_variables
+  final Product data;
 
   @override
   State<ShopDetailScreen> createState() => _ShopDetailScreenState();
@@ -17,51 +28,59 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final data = widget.data;
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  expandedHeight: getProportionateScreenHeight(428),
-                  leading: IconButton(
-                    icon: Image.asset('assets/icons/back@2x.png', scale: 2),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Container(
-                      color: const Color(0xFFeeeeee),
-                      child: Image.asset(
-                        'assets/icons/products/detail_sofa.png',
-                        fit: BoxFit.none,
+        child: Container(
+          color: color3,
+          child: Stack(
+            children: [
+              CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    expandedHeight: getProportionateScreenHeight(428),
+                    leading: IconButton(
+                      icon: Image.asset(
+                        'assets/icons/back@2x.png',
+                        scale: 1,
+                        color: color6,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                        color: color4,
+                        child: Image.network(
+                          data.mainImage.isEmpty ? '' : data.mainImage,
+                          fit: BoxFit.fill,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ..._buildTitle(),
-                        const SizedBox(height: 16),
-                        _buildLine(),
-                        const SizedBox(height: 16),
-                        ..._buildDescription(),
-                        const SizedBox(height: 24),
-                        _buildQuantity(),
-                        const SizedBox(height: 115),
-                      ],
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ..._buildTitle(),
+                          const SizedBox(height: 16),
+                          _buildLine(),
+                          const SizedBox(height: 16),
+                          ..._buildDescription(),
+                          const SizedBox(height: 24),
+                          _buildQuantity(),
+                          const SizedBox(height: 115),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            _buldFloatBar()
-          ],
+                ],
+              ),
+              _buldFloatBar()
+            ],
+          ),
         ),
       ),
     );
@@ -74,13 +93,17 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         children: [
           const FittedBox(
             child: Text(
-              'Mid Century Sofa',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
+              '',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 32, color: color2),
             ),
           ),
           IconButton(
             onPressed: () => setState(() => _iscollected = !_iscollected),
-            icon: Image.asset('assets/icons/${_iscollected ? 'bold' : 'light'}/heart@2x.png'),
+            icon: Image.asset(
+              'assets/icons/${_iscollected ? 'bold' : 'light'}/heart@2x.png',
+              color: color4,
+            ),
             iconSize: 28,
           ),
         ],
@@ -92,19 +115,26 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(6)),
-              color: Color(0xFFeeeeee),
+              color: color4,
             ),
             child: const Text(
               '9,742 sold',
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                  fontSize: 10, fontWeight: FontWeight.w500, color: color3),
             ),
           ),
           const SizedBox(width: 16),
-          Image.asset('assets/icons/start@2x.png', height: 20, width: 20),
+          Image.asset(
+            'assets/icons/start@2x.png',
+            height: 20,
+            width: 20,
+            color: color1,
+          ),
           const SizedBox(width: 8),
           const Text(
             '4.8 (6,573 reviews)',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w500, color: color5),
           ),
         ],
       ),
@@ -112,18 +142,22 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   }
 
   Widget _buildLine() {
-    return Container(height: 1, color: const Color(0xFFEEEEEE));
+    return Container(height: 1, color: color5);
   }
 
   List<Widget> _buildDescription() {
     return [
-      const Text('Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      const Text('Descripción',
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: color5)),
       const SizedBox(height: 8),
       const ExpandableText(
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit ametLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et Lorem ipsum dolor sit amet',
-        expandText: 'view more',
-        collapseText: 'view less',
-        linkStyle: TextStyle(color: Color(0xFF424242), fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 14, color: color2),
+        '}',
+        linkColor: color5,
+        expandText: 'ver más',
+        collapseText: 'ver menos',
+        linkStyle: TextStyle(color: color5, fontWeight: FontWeight.bold),
       ),
     ];
   }
@@ -131,12 +165,14 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   Widget _buildQuantity() {
     return Row(
       children: [
-        const Text('Quantity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        const Text('Cantidad',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 18, color: color5)),
         const SizedBox(width: 20),
         Container(
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(24)),
-            color: Color(0xFFF3F3F3),
+            color: color4,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Material(
@@ -144,7 +180,11 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
             child: Row(
               children: [
                 InkWell(
-                  child: Image.asset('assets/icons/detail/minus@2x.png', scale: 2),
+                  child: Image.asset(
+                    'assets/icons/detail/minus@2x.png',
+                    scale: 2,
+                    color: color6,
+                  ),
                   onTap: () {
                     if (_quantity <= 0) return;
                     setState(() => _quantity -= 1);
@@ -153,12 +193,16 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                 const SizedBox(width: 20),
                 Text('$_quantity',
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    )),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: color2)),
                 const SizedBox(width: 20),
                 InkWell(
-                  child: Image.asset('assets/icons/detail/plus@2x.png', scale: 2),
+                  child: Image.asset(
+                    'assets/icons/detail/plus@2x.png',
+                    scale: 2,
+                    color: color6,
+                  ),
                   onTap: () => setState(() => _quantity += 1),
                 ),
               ],
@@ -175,7 +219,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           width: getProportionateScreenWidth(258),
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(29)),
-            color: const Color(0xFF101010),
+            color: color5,
             boxShadow: [
               BoxShadow(
                 offset: const Offset(4, 8),
@@ -187,16 +231,25 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
+              highlightColor: color6,
+              splashColor: color6,
               borderRadius: const BorderRadius.all(Radius.circular(29)),
               // splashColor: const Color(0xFFEEEEEE),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const OrderDetailScreen(),
+                  ),
+                );
+              },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset('assets/icons/detail/bag@2x.png', scale: 2),
                   const SizedBox(width: 16),
                   const Text(
-                    'Add to Cart',
+                    'Verifica tus datos',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -214,7 +267,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       left: 0,
       right: 0,
       child: Container(
-        color: Colors.white,
+        color: color3,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
@@ -226,9 +279,14 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    Text('Total price', style: TextStyle(color: Color(0xFF757575), fontSize: 12)),
+                    Text('Total price',
+                        style: TextStyle(color: color2, fontSize: 12)),
                     SizedBox(height: 6),
-                    Text('\$280.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+                    Text('\$280.00',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            color: color6)),
                   ],
                 ),
                 buildAddCard()

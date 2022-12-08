@@ -1,58 +1,85 @@
 import 'package:flutter/material.dart';
-import 'package:freshbuyer/model/popular.dart';
+import 'package:freshbuyer/model/productElement.dart';
+
+import '../constants.dart';
+import '../screens/detail/detail_screen.dart';
 
 typedef ProductCardOnTaped = void Function(Product data);
 
-class ProductCard extends StatelessWidget {
+bool _iscollected = false;
+
+class ProductCard extends StatefulWidget {
   const ProductCard({super.key, required this.data, this.ontap});
 
   final Product data;
   final ProductCardOnTaped? ontap;
 
   @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+  @override
   Widget build(BuildContext context) {
-    // final data = datas[index % datas.length];
+    final data = widget.data;
     const borderRadius = BorderRadius.all(Radius.circular(20));
     return InkWell(
+      hoverColor: color4,
       borderRadius: borderRadius,
-      onTap: () => ontap?.call(data),
-      child: Column(
+      onTap: () =>
+          Navigator.pushNamed(context, ShopDetailScreen.route(data.id)),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             decoration: const BoxDecoration(
               borderRadius: borderRadius,
-              color: Color(0xFFeeeeee),
+              color: color5,
             ),
             child: Stack(
               children: [
-                Image.asset(data.icon, width: 182, height: 182),
+                Container(
+                    child: Image.network(widget.data.mainImage,
+                        width: 180, height: 180)),
                 Positioned(
-                  top: 16,
-                  right: 16,
-                  child: Image.asset('assets/icons/not_collected@2x.png', width: 28, height: 28),
+                  child: IconButton(
+                    onPressed: () =>
+                        setState(() => _iscollected = !_iscollected),
+                    icon: Image.asset(
+                        'assets/icons/${_iscollected ? 'bold' : 'light'}/heart@2x.png',
+                        color: color2),
+                    iconSize: 28,
+                  ),
                 )
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          FittedBox(
-            child: Text(
-              data.title,
-              style: const TextStyle(
-                color: Color(0xFF212121),
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+          Container(
+            padding: const EdgeInsets.only(left: 16),
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                FittedBox(
+                  child: Text(
+                    widget.data.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: color6,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _buildSoldPoint(4.5, 6937),
+                const SizedBox(height: 10),
+                Text(
+                  '\$${widget.data.price.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold, color: color2),
+                )
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          _buildSoldPoint(4.5, 6937),
-          const SizedBox(height: 10),
-          Text(
-            '\$${data.price.toStringAsFixed(2)}',
-            style: const TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF212121)),
           )
         ],
       ),
@@ -62,12 +89,13 @@ class ProductCard extends StatelessWidget {
   Widget _buildSoldPoint(double star, int sold) {
     return Row(
       children: [
-        Image.asset('assets/icons/start@2x.png', width: 20, height: 20),
+        Image.asset('assets/icons/start@2x.png',
+            width: 20, height: 20, color: color6),
         const SizedBox(width: 8),
         Text(
           '$star',
           style: const TextStyle(
-            color: Color(0xFF616161),
+            color: color3,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -75,17 +103,18 @@ class ProductCard extends StatelessWidget {
         const SizedBox(width: 8),
         const Text(
           '|',
-          style: TextStyle(fontWeight: FontWeight.w500, color: Color(0xFF616161), fontSize: 14),
+          style: TextStyle(
+              fontWeight: FontWeight.w500, color: color6, fontSize: 14),
         ),
         const SizedBox(width: 8),
         Container(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(6)),
-            color: const Color(0xFF101010).withOpacity(0.08),
+            color: color2.withOpacity(0.5),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           child: Text(
-            '$sold sold',
+            '$sold Vendidos',
             style: const TextStyle(
               color: Color(0xFF35383F),
               fontWeight: FontWeight.w500,

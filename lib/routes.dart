@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/screens/detail/detail_screen.dart';
+
 import 'package:freshbuyer/screens/home/home.dart';
 import 'package:freshbuyer/screens/mostpopular/most_popular_screen.dart';
 import 'package:freshbuyer/screens/profile/profile_screen.dart';
 import 'package:freshbuyer/screens/special_offers/special_offers_screen.dart';
 import 'package:freshbuyer/screens/test/test_screen.dart';
+import 'package:freshbuyer/screens/wallet/wallet_screen.dart';
+
+var initialRoute = HomeScreen.route();
+var product = [];
 
 final Map<String, WidgetBuilder> routes = {
   HomeScreen.route(): (context) => const HomeScreen(title: '123'),
+  WalletScreen.route(): (context) => const WalletScreen(),
   MostPopularScreen.route(): (context) => const MostPopularScreen(),
   SpecialOfferScreen.route(): (context) => const SpecialOfferScreen(),
+  ShopDetailScreen.route(""): (context) => ShopDetailScreen(data: product[0]),
   ProfileScreen.route(): (context) => const ProfileScreen(),
-  ShopDetailScreen.route(): (context) => const ShopDetailScreen(),
   TestScreen.route(): (context) => const TestScreen(),
 };

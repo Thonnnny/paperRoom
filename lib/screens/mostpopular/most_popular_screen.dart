@@ -1,8 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/components/app_bar.dart';
 import 'package:freshbuyer/components/product_card.dart';
-import 'package:freshbuyer/model/popular.dart';
+
+import 'package:freshbuyer/model/productElement.dart';
+import 'package:freshbuyer/model/productResponse.dart';
+import 'package:freshbuyer/screens/detail/detail_screen.dart';
 import 'package:freshbuyer/screens/home/most_popular.dart';
+
+import '../../helpers/base_client.dart';
+import '../../helpers/res_apis.dart';
 
 class MostPopularScreen extends StatefulWidget {
   const MostPopularScreen({super.key});
@@ -13,16 +21,26 @@ class MostPopularScreen extends StatefulWidget {
   State<MostPopularScreen> createState() => _MostPopularScreenState();
 }
 
-class _MostPopularScreenState extends State<MostPopularScreen> {
-  late final datas = homePopularProducts;
+Future<List<Product>> getProducts() async {
+  final response = await BaseClient()
+      .get(RestApis.apiProducts, {"Content-Type": "application/json"});
 
+  print("******************************************************response");
+  print(response);
+
+  final productResponse = ProductResponse.fromJson(jsonDecode(response));
+  return productResponse.products;
+}
+
+class _MostPopularScreenState extends State<MostPopularScreen> {
+  late final datas = getProducts();
   @override
   Widget build(BuildContext context) {
     const padding = EdgeInsets.fromLTRB(24, 24, 24, 0);
     return Scaffold(
       appBar: FRAppBar.defaultAppBar(
         context,
-        title: 'Most Popular',
+        title: 'Más populares',
         actions: [
           IconButton(
             icon: Image.asset('assets/icons/search@2x.png', scale: 2.0),
@@ -55,16 +73,41 @@ class _MostPopularScreenState extends State<MostPopularScreen> {
         maxCrossAxisExtent: 185,
         mainAxisSpacing: 24,
         crossAxisSpacing: 16,
-        mainAxisExtent: 285,
       ),
-      delegate: SliverChildBuilderDelegate(_buildPopularItem, childCount: 30),
+      delegate: SliverChildBuilderDelegate(_buildPopularItem, childCount: 1),
     );
   }
 
   Widget _buildPopularItem(BuildContext context, int index) {
-    final data = datas[index % datas.length];
-    return ProductCard(
-      data: data,
+    return FutureBuilder(
+      future: getProducts(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                  child: Stack(
+                    children: <Widget>[
+                      ProductCard(
+                        data: snapshot.data![index],
+                      )
+                    ],
+                  ),
+                  onTap: () => Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              ShopDetailScreen(data: snapshot.data![index])),
+                      (Route<dynamic> route) => false));
+            },
+            itemCount: snapshot.data?.length,
+          );
+        } else if (snapshot.hasError) {
+          return Text("${snapshot.error}");
+        }
+        return const CircularProgressIndicator();
+      },
     );
   }
 }

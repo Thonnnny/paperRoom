@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/model/popular.dart';
 
 class MostPupularCategory extends StatefulWidget {
@@ -43,8 +44,8 @@ class _MostPupularCategoryState extends State<MostPupularCategory> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: radius,
-        border: Border.all(color: const Color(0xFF101010), width: 2),
-        color: isActive ? const Color(0xFF101010) : const Color(0xFFFFFFFF),
+        border: Border.all(color: color5, width: 2),
+        color: isActive ? color5 : color4,
       ),
       alignment: Alignment.center,
       child: InkWell(
@@ -55,7 +56,8 @@ class _MostPupularCategoryState extends State<MostPupularCategory> {
           child: Text(
             data.category,
             style: TextStyle(
-              color: isActive ? const Color(0xFFFFFFFF) : const Color(0xFF101010),
+              color:
+                  isActive ? const Color(0xFFFFFFFF) : const Color(0xFF101010),
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -87,12 +89,15 @@ class MostPopularTitle extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text('Most Popular',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Color(0xFF212121))),
+        const Text('Más Populares',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Color(0xFF212121))),
         TextButton(
           onPressed: () => onTapseeAll(),
           child: const Text(
-            'See All',
+            'Ver Todos',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,

@@ -8,7 +8,9 @@ class HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.only(
+        left: 45,
+      ),
       child: Row(
         children: [
           InkWell(
@@ -27,19 +29,19 @@ class HomeAppBar extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   Text(
-                    'Good Morning 👋',
+                    'Bienvenido 👋',
                     style: TextStyle(
-                      color: Color(0xFF757575),
-                      fontWeight: FontWeight.w500,
-                    ),
+                        color: color2,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15),
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Abson He',
+                    'Nombre de usuario',
                     style: TextStyle(
-                      color: Color(0xFF212121),
-                      fontWeight: FontWeight.bold,
-                    ),
+                        color: color2,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15),
                     textAlign: TextAlign.start,
                   ),
                 ],
@@ -48,13 +50,13 @@ class HomeAppBar extends StatelessWidget {
           ),
           IconButton(
             iconSize: 28,
-            icon: Image.asset('$kIconPath/notification.png'),
+            icon: Image.asset('$kIconPath/notification.png', color: color6),
             onPressed: () {},
           ),
           const SizedBox(width: 16),
           IconButton(
             iconSize: 28,
-            icon: Image.asset('$kIconPath/light/heart@2x.png'),
+            icon: Image.asset('$kIconPath/light/heart@2x.png', color: color6),
             onPressed: () {},
           ),
         ],
