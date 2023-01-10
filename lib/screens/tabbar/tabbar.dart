@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freshbuyer/cart/cart_screen.dart';
 import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/image_loader.dart';
@@ -7,6 +8,7 @@ import 'package:freshbuyer/screens/profile/profile_screen.dart';
 import 'package:freshbuyer/screens/test/test_screen.dart';
 import 'package:freshbuyer/size_config.dart';
 
+import '../../bloc/cart/bloc/cart_bloc.dart';
 import '../wallet/wallet_screen.dart';
 
 class TabbarItem {
@@ -42,7 +44,24 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
     const HomeScreen(
       title: '首页0',
     ),
-    const CartScreen(),
+    BlocBuilder<CartBloc, CartState>(
+      builder: (context, state) {
+        return state.existCart
+            ? CartScreen(
+                product: state.product!,
+              )
+            : const Scaffold(
+                backgroundColor: color4,
+                body: Center(
+                  child: Text("No hay productos en el carrito",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: color3)),
+                ),
+              );
+      },
+    ),
     const TestScreen(title: 'Orders'),
     const WalletScreen(),
     const ProfileScreen(),

@@ -13,6 +13,7 @@ import 'package:freshbuyer/screens/home/search_field.dart';
 import 'package:freshbuyer/screens/home/special_offer.dart';
 import 'package:freshbuyer/screens/mostpopular/most_popular_screen.dart';
 import 'package:freshbuyer/screens/special_offers/special_offers_screen.dart';
+import 'package:freshbuyer/class/classApi.dart';
 
 import '../../model/productElement.dart';
 
@@ -27,24 +28,18 @@ class HomeScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _HomeScreenState();
 }
 
-Future<List<Product>> _getProductItems() async {
-  final response = await BaseClient()
-      .get(RestApis.apiProducts, {"Content-Type": "application/json"});
-
-  print("******************************************************response");
-  print(response);
-
-  final productResponse = ProductResponse.fromJson(jsonDecode(response));
-  return productResponse.products;
-}
-
-@override
-void initState() {
-  _getProductItems();
-}
-
 class _HomeScreenState extends State<HomeScreen> {
-  late final datas = _getProductItems();
+  ApisClass apisClass = ApisClass();
+  late final datas = apisClass.getProductItems();
+  @override
+  void initState() {
+    super.initState();
+    apisClass.getProductItems().then((value) {
+      print(
+          '*************************this is your product data home *************');
+      print(value);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,12 +111,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPopularItem(BuildContext context, int index) {
     return FutureBuilder<List<Product>>(
-      future: _getProductItems(),
+      future: apisClass.getProductItems(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return ListView.builder(
             shrinkWrap: true,
             scrollDirection: Axis.vertical,
+            itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                   child: Stack(
@@ -131,10 +127,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       )
                     ],
                   ),
-                  onTap: () => Navigator.pushNamed(context,
-                      ShopDetailScreen.route(snapshot.data![index].id)));
+                  onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ShopDetailScreen(
+                                  data: snapshot.data![index],
+                                )),
+                      ));
             },
-            itemCount: snapshot.data!.length,
           );
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");

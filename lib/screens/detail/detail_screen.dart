@@ -1,4 +1,3 @@
-import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
 
 import 'package:freshbuyer/orders/details_order.dart';
@@ -9,26 +8,26 @@ import '../../model/productElement.dart';
 
 // ignore: must_be_immutable
 class ShopDetailScreen extends StatefulWidget {
+  final Product data;
   const ShopDetailScreen({
     super.key,
     required this.data,
   });
-
-  static String route(String id) => '/shop_detail';
+  static String route() => '/shop_detail';
   // ignore: prefer_typing_uninitialized_variables
-  final Product data;
 
   @override
   State<ShopDetailScreen> createState() => _ShopDetailScreenState();
 }
 
 class _ShopDetailScreenState extends State<ShopDetailScreen> {
+  late Product data;
   int _quantity = 0;
+  int index = 0;
   bool _iscollected = false;
 
   @override
   Widget build(BuildContext context) {
-    final data = widget.data;
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -52,8 +51,8 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                       background: Container(
                         color: color4,
                         child: Image.network(
-                          data.mainImage.isEmpty ? '' : data.mainImage,
                           fit: BoxFit.fill,
+                          widget.data.mainImage,
                         ),
                       ),
                     ),
@@ -91,12 +90,10 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const FittedBox(
-            child: Text(
-              '',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 32, color: color2),
-            ),
+          Text(
+            widget.data.name,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 32, color: color2),
           ),
           IconButton(
             onPressed: () => setState(() => _iscollected = !_iscollected),
@@ -151,14 +148,18 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           style: TextStyle(
               fontSize: 18, fontWeight: FontWeight.bold, color: color5)),
       const SizedBox(height: 8),
-      const ExpandableText(
-        style: TextStyle(fontSize: 14, color: color2),
-        '}',
-        linkColor: color5,
-        expandText: 'ver más',
-        collapseText: 'ver menos',
-        linkStyle: TextStyle(color: color5, fontWeight: FontWeight.bold),
+      Text(
+        widget.data.description,
+        style: const TextStyle(fontSize: 14, color: color2),
       ),
+      // const ExpandableText(
+      //   productElement['description'],
+      //   style: TextStyle(fontSize: 14, color: color2),
+      //   linkColor: color5,
+      //   expandText: 'ver más',
+      //   collapseText: 'ver menos',
+      //   linkStyle: TextStyle(color: color5, fontWeight: FontWeight.bold),
+      // ),
     ];
   }
 
@@ -191,7 +192,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                   },
                 ),
                 const SizedBox(width: 20),
-                Text('$_quantity',
+                Text(widget.data.price.toString(),
                     style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -312,7 +313,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
 //   static const viewMore = ' view more...';
 //   static const fixedLength = 50;
 //   late String textToDisplay;
-//   @override
+//   @override  
 //   void initState() {
 //     //if the text has more than a certain number of characters, the text we display will consist of that number of characters;
 //     //if it's not longer we display all the text

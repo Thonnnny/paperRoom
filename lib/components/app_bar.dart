@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants.dart';
+
 abstract class FRAppBar {
   static PreferredSizeWidget defaultAppBar(
     BuildContext context, {
@@ -7,6 +9,8 @@ abstract class FRAppBar {
     List<Widget>? actions,
   }) {
     return AppBar(
+      backgroundColor: color5,
+      elevation: 10,
       leading: IconButton(
         onPressed: (() => Navigator.pop(context)),
         icon: Image.asset(

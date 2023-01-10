@@ -1,67 +1,161 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freshbuyer/constants.dart';
+import 'package:freshbuyer/routes.dart';
+
+import '../bloc/cart/bloc/cart_bloc.dart';
 
 import '../components/app_button.dart';
-import '../components/chart_item.dart';
-import '../helpers/column_with_separator.dart';
-import '../model/popular.dart';
+import '../components/app_text.dart';
+import '../components/item_counter.dart';
+
+import '../model/productElement.dart';
 import 'checkout_bottom_sheet.dart';
 
-class CartScreen extends StatelessWidget {
-  const CartScreen({super.key});
+class CartScreen extends StatefulWidget {
+  final Product product;
 
+  const CartScreen({super.key, required this.product});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  double height = 110;
+  Color borderColor = Color(0xffE2E2E2);
+  double borderRadius = 18;
+  int amount = 1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: color4,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 25,
-              ),
-              const Text(
-                "Carrito de compras",
-                style: TextStyle(
-                    fontSize: 20, fontWeight: FontWeight.bold, color: color2),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Column(
-                children: getChildrenWithSeperator(
-                  addToLastChild: false,
-                  widgets: homePopularProducts.map((e) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 25,
-                      ),
-                      width: double.maxFinite,
-                      child: ChartItemWidget(
-                        item: e,
-                      ),
-                    );
-                  }).toList(),
-                  seperator: const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 25,
-                    ),
-                    child: Divider(
-                      thickness: 1,
+      body: BlocBuilder<CartBloc, CartState>(
+        builder: (context, state) {
+          return state.existCart
+              ? SafeArea(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const SizedBox(
+                          height: 25,
+                        ),
+                        const Text(
+                          "Carrito de compras",
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: color3),
+                        ),
+                        const Divider(
+                          height: 10,
+                        ),
+                        Column(
+                          children: [
+                            Container(
+                              height: height,
+                              margin: const EdgeInsets.symmetric(
+                                vertical: 30,
+                              ),
+                              child: IntrinsicHeight(
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    imageWidget(),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        AppText(
+                                          text: '${widget.product.name}',
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: color6,
+                                        ),
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                        AppText(
+                                            text: '${widget.product.price}'
+                                                .toString(),
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: color2),
+                                        const SizedBox(
+                                          height: 12,
+                                        ),
+                                        // const Spacer(),
+                                        ItemCounterWidget(
+                                          onAmountChanged: (newAmount) {
+                                            setState(() {
+                                              amount = newAmount;
+                                            });
+                                          },
+                                        )
+                                      ],
+                                    ),
+                                    Column(
+                                      children: [
+                                        const Icon(
+                                          Icons.close,
+                                          color: color3,
+                                          size: 25,
+                                        ),
+                                        const Spacer(
+                                          flex: 5,
+                                        ),
+                                        SizedBox(
+                                          width: 70,
+                                          child: AppText(
+                                            text:
+                                                "\$${getPrice().toStringAsFixed(2)}",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            textAlign: TextAlign.right,
+                                            color: color3,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        const Divider(
+                          thickness: 1,
+                        ),
+                        getCheckoutButton(context)
+                      ],
                     ),
                   ),
-                ),
-              ),
-              const Divider(
-                thickness: 1,
-              ),
-              getCheckoutButton(context)
-            ],
-          ),
-        ),
+                )
+              : const Center(
+                  child: Text("No hay productos en el carrito",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: color3)),
+                );
+        },
       ),
     );
+  }
+
+  Widget imageWidget() {
+    return Container(
+      width: 135,
+      child: Image.network('${widget.product.mainImage}'),
+    );
+  }
+
+  int getPrice() {
+    return widget.product.price * amount;
   }
 
   Widget getCheckoutButton(BuildContext context) {

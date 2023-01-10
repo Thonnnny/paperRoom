@@ -22,7 +22,7 @@ class SpecialOfferWidget extends StatelessWidget {
       children: [
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(left: 32),
+            padding: const EdgeInsets.only(left: 15),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,7 +30,7 @@ class SpecialOfferWidget extends StatelessWidget {
                 Text(
                   data.discount,
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 40, color: color6),
+                      fontWeight: FontWeight.bold, fontSize: 35, color: color6),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -42,13 +42,13 @@ class SpecialOfferWidget extends StatelessWidget {
                 Text(
                   data.detail,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 12, color: color2),
+                      fontWeight: FontWeight.w700, fontSize: 12, color: color3),
                 ),
               ],
             ),
           ),
         ),
-        Image.asset(data.icon),
+        Image.asset(data.icon, width: 150, height: 150, fit: BoxFit.cover),
       ],
     );
   }

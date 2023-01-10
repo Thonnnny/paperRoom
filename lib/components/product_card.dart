@@ -21,13 +21,13 @@ class ProductCard extends StatefulWidget {
 class _ProductCardState extends State<ProductCard> {
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     final data = widget.data;
     const borderRadius = BorderRadius.all(Radius.circular(20));
     return InkWell(
       hoverColor: color4,
       borderRadius: borderRadius,
-      onTap: () =>
-          Navigator.pushNamed(context, ShopDetailScreen.route(data.id)),
+      onTap: () => Navigator.pushNamed(context, ShopDetailScreen.route()),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -40,7 +40,7 @@ class _ProductCardState extends State<ProductCard> {
               children: [
                 Container(
                     child: Image.network(widget.data.mainImage,
-                        width: 180, height: 180)),
+                        width: 150, height: 150, fit: BoxFit.cover)),
                 Positioned(
                   child: IconButton(
                     onPressed: () =>
@@ -55,13 +55,15 @@ class _ProductCardState extends State<ProductCard> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.only(left: 16),
+            width: size.width * 0.5,
+            height: size.height * 0.2,
             child: Column(
               children: [
                 const SizedBox(height: 12),
                 FittedBox(
                   child: Text(
-                    widget.data.name,
+                    widget.data.name.split('').first.toUpperCase() +
+                        widget.data.name.split('').sublist(1).join(''),
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: color6,
@@ -70,7 +72,9 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(
+                  height: 10,
+                ),
                 _buildSoldPoint(4.5, 6937),
                 const SizedBox(height: 10),
                 Text(

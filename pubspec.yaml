@@ -30,6 +30,9 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   art_sweetalert: ^0.0.5
+  quickalert: ^1.0.1
+  bloc: ^8.1.0
+  bloc_provider: ^1.0.0
   cached_network_image: ^3.2.3
   cloud_firestore: ^4.1.0
   cupertino_icons: ^1.0.2
@@ -40,6 +43,7 @@ dependencies:
   firebase_storage: ^11.0.6
   flutter:
     sdk: flutter
+  flutter_bloc: ^8.1.1
   get: ^4.6.5
   http: ^0.13.5
   image_picker: ^0.8.6

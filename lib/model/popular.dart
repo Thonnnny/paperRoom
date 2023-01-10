@@ -31,7 +31,7 @@ final homePopularCategories = [
   PopularCategory(category: 'Otros', id: '7'),
 ];
 
-final homePopularProducts = [
+final homePopularProducts = <Product>[
   Product(
     title: 'Planners',
     star: 4.5,
