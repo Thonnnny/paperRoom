@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freshbuyer/bloc/shop/shop_bloc.dart';
 import 'package:freshbuyer/components/product_card.dart';
 import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/helpers/base_client.dart';
@@ -16,6 +18,7 @@ import 'package:freshbuyer/screens/special_offers/special_offers_screen.dart';
 import 'package:freshbuyer/class/classApi.dart';
 
 import '../../model/productElement.dart';
+import '../UI/shopping_cart.dart';
 
 class HomeScreen extends StatefulWidget {
   final String title;
@@ -29,21 +32,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late Future<List<Product>> _products;
   ApisClass apisClass = ApisClass();
-  late final datas = apisClass.getProductItems();
   @override
   void initState() {
     super.initState();
-    apisClass.getProductItems().then((value) {
-      print(
-          '*************************this is your product data home *************');
-      print(value);
-    });
+    _products = apisClass.getProductItems();
   }
 
   @override
   Widget build(BuildContext context) {
-    const padding = EdgeInsets.fromLTRB(20, 20, 10, 0);
+    const padding = EdgeInsets.fromLTRB(10, 20, 10, 0);
     return SafeArea(
       child: Scaffold(
         backgroundColor: color4,
@@ -89,7 +88,9 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 24),
         SpecialOffers(onTapSeeAll: () => _onTapSpecialOffersSeeAll(context)),
         const SizedBox(height: 24),
-        MostPopularTitle(onTapseeAll: () => _onTapMostPopularSeeAll(context)),
+        MostPopularTitle(onTapseeAll: () {
+          _onTapMostPopularSeeAll(context);
+        }),
         const SizedBox(height: 24),
         const MostPupularCategory(),
       ],
@@ -111,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPopularItem(BuildContext context, int index) {
     return FutureBuilder<List<Product>>(
-      future: apisClass.getProductItems(),
+      future: _products,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return ListView.builder(
@@ -127,13 +128,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       )
                     ],
                   ),
-                  onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ShopDetailScreen(
-                                  data: snapshot.data![index],
-                                )),
-                      ));
+                  onTap: () {
+                    print(snapshot.data![index].id);
+                    print('this is your home shopdetailscreen');
+                    ShopDetailScreen(
+                      data: snapshot.data![index],
+                    );
+                  });
             },
           );
         } else if (snapshot.hasError) {
@@ -145,7 +146,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onTapMostPopularSeeAll(BuildContext context) {
-    Navigator.pushNamed(context, MostPopularScreen.route());
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (BuildContext context) => const MostPopularScreen()),
+        (Route<dynamic> route) => false);
   }
 
   void _onTapSpecialOffersSeeAll(BuildContext context) {

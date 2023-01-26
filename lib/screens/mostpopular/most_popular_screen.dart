@@ -7,6 +7,7 @@ import 'package:freshbuyer/screens/detail/detail_screen.dart';
 
 import '../../class/classApi.dart';
 import '../../components/product_cardtocar.dart';
+import '../../model/productElement.dart';
 
 class MostPopularScreen extends StatefulWidget {
   const MostPopularScreen({super.key});
@@ -18,15 +19,12 @@ class MostPopularScreen extends StatefulWidget {
 }
 
 class _MostPopularScreenState extends State<MostPopularScreen> {
+  late Future<List<Product>> _products;
   ApisClass apisClass = ApisClass();
-  late final datas = apisClass.getProductItems();
-
   @override
   void initState() {
     super.initState();
-    apisClass.getProductItems().then((value) {
-      print(value);
-    });
+    _products = apisClass.getProductItems();
   }
 
   @override
@@ -43,41 +41,19 @@ class _MostPopularScreenState extends State<MostPopularScreen> {
             ),
           ],
         ),
-        // body: CustomScrollView(slivers: [
-        //   SliverPadding(
-        //     padding: padding,
-        //     sliver: SliverList(
-        //       delegate: SliverChildBuilderDelegate(
-        //         ((context, index) => const MostPupularCategory()),
-        //         childCount: 1,
-        //       ),
-        //     ),
-        //   ),
-        body: Center(child: _buildPopularItem(context, 2))
-        // const SliverAppBar(flexibleSpace: SizedBox(height: 24))
-        );
+        body: Center(child: _buildPopularItem(context, 2)));
   }
-
-  // Widget _buildPopulars() {
-  //   return SliverGrid(
-  //     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-  //       maxCrossAxisExtent: 185,
-  //       mainAxisSpacing: 24,
-  //       crossAxisSpacing: 16,
-  //     ),
-  //     delegate: SliverChildBuilderDelegate(_buildPopularItem, childCount: 1),
-  //   );
-  // }
 
   Widget _buildPopularItem(BuildContext context, int index) {
     return FutureBuilder(
-      future: apisClass.getProductItems(),
+      future: _products,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             shrinkWrap: true,
             scrollDirection: Axis.vertical,
+            itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                   child: Stack(
@@ -87,14 +63,10 @@ class _MostPopularScreenState extends State<MostPopularScreen> {
                       ),
                     ],
                   ),
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ShopDetailScreen(
-                                data: snapshot.data![index],
-                              ))));
+                  onTap: () {
+                    ShopDetailScreen(data: snapshot.data![index]);
+                  });
             },
-            itemCount: snapshot.data?.length,
           );
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");

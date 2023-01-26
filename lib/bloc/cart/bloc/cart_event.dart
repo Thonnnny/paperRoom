@@ -1,26 +1,15 @@
-part of 'cart_bloc.dart';
+import '../../../model/productElement.dart';
 
-@immutable
 abstract class CartEvent {}
 
-class AddToCart extends CartEvent {
+class AddProduct extends CartEvent {
   final Product product;
-
-  AddToCart(this.product);
-  @override
-  List<Object> get props => [product];
-
-  @override
-  String toString() => 'AddProduct { index: $product }';
+  AddProduct(this.product);
 }
 
-class RemoveFromCart extends CartEvent {
-  final List<Product> product;
-
-  RemoveFromCart(this.product);
-  @override
-  List<Object> get props => [product];
-
-  @override
-  String toString() => 'RemoveProduct { index: $product }';
+class RemoveProduct extends CartEvent {
+  final Product product;
+  RemoveProduct(this.product);
 }
+
+class ClearCart extends CartEvent {}

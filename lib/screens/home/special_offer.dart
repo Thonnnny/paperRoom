@@ -73,7 +73,7 @@ class _SpecialOffersState extends State<SpecialOffers> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(15),
                       child: Image.asset(
                         data.icon,
                         width: 35,

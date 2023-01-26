@@ -85,27 +85,27 @@ class MostPopularTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Text('Más Populares',
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Color(0xFF212121))),
-        TextButton(
-          onPressed: () => onTapseeAll(),
-          child: const Text(
-            'Ver Todos',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Color(0xFF212121),
+    return Padding(
+      padding: const EdgeInsets.only(left: 15.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text('Tienda',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Color(0xFF212121))),
+          TextButton(
+            onPressed: () => onTapseeAll(),
+            child: const Text(
+              'Ver Todos',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 16, color: color6),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants.dart';
+import '../screens/tabbar/tabbar.dart';
 
 abstract class FRAppBar {
   static PreferredSizeWidget defaultAppBar(
@@ -12,7 +13,10 @@ abstract class FRAppBar {
       backgroundColor: color5,
       elevation: 10,
       leading: IconButton(
-        onPressed: (() => Navigator.pop(context)),
+        onPressed: (() => Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) => const FRTabbarScreen()),
+            (Route<dynamic> route) => false)),
         icon: Image.asset(
           'assets/icons/back@2x.png',
           scale: 2.0,

@@ -5,6 +5,7 @@ import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 import '../bloc/cart/bloc/cart_bloc.dart';
+import '../bloc/cart/bloc/cart_event.dart';
 import '../constants.dart';
 
 typedef ProductCardOnTaped = void Function(Product data);
@@ -42,14 +43,15 @@ class _ProductCardtoCarState extends State<ProductCardtoCar> {
               ),
               child: Stack(
                 children: [
-                  Image.network(widget.data.mainImage, width: 180, height: 180),
+                  Image.network(widget.data.mainImage,
+                      width: 250, height: 250, fit: BoxFit.cover),
                   Positioned(
                     child: IconButton(
                       onPressed: () =>
                           setState(() => _iscollected = !_iscollected),
                       icon: Image.asset(
                           'assets/icons/${_iscollected ? 'bold' : 'light'}/heart@2x.png',
-                          color: color2),
+                          color: color6),
                       iconSize: 28,
                     ),
                   )
@@ -106,31 +108,14 @@ class _ProductCardtoCarState extends State<ProductCardtoCar> {
                       ),
                     ),
                     onPressed: () {
-                      final newProduct = Product(
-                          id: widget.data.id,
-                          name: widget.data.name,
-                          description: widget.data.description,
-                          price: widget.data.price,
-                          priceCurrency: widget.data.priceCurrency,
-                          inOffer: widget.data.inOffer,
-                          mainImage: widget.data.mainImage,
-                          images: widget.data.images,
-                          category: widget.data.category,
-                          visible: widget.data.visible,
-                          sku: widget.data.sku,
-                          stock: widget.data.stock,
-                          tags: widget.data.tags,
-                          isVariant: widget.data.isVariant,
-                          variantsCode: widget.data.variantsCode,
-                          createdAt: widget.data.createdAt,
-                          v: widget.data.v);
-                      print('this is the product to add to cart');
-                      print(newProduct);
                       BlocProvider.of<CartBloc>(context)
-                          .add(AddToCart(newProduct));
+                          .add(AddProduct(widget.data));
                       QuickAlert.show(
                         context: context,
+                        title: 'Éxito',
                         type: QuickAlertType.success,
+                        confirmBtnColor: Colors.green,
+                        confirmBtnText: 'Ok',
                         text: 'Producto agregado!',
                       );
                     },

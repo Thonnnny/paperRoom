@@ -37,16 +37,16 @@ class ExceptionHandlers {
 }
 
 class AppException {
-  final String? message;
-  final String? prefix;
-  final String? url;
+  String? message;
+  String? prefix;
+  String? url;
 
   AppException([this.message, this.prefix, this.url]);
 }
 
 class BadRequestException extends AppException {
   BadRequestException([String? message, String? url])
-      : super(message!, 'Mala solicitud', url!);
+      : super(message, 'Mala solicitud', url);
 }
 
 class FetchDataException extends AppException {

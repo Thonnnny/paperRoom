@@ -1,13 +1,18 @@
-import 'package:art_sweetalert/art_sweetalert.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/helpers/res_apis.dart';
+import 'package:freshbuyer/screens/tabbar/tabbar.dart';
 import 'package:lottie/lottie.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../constants.dart';
 import '../../components/background.dart';
 import '../../components/rounded_button.dart';
+
 import '../../helpers/base_client.dart';
 import '../../providers/login_provider.dart';
 
@@ -16,59 +21,83 @@ class LoginScreen extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
+  static String route() => '/login';
   @override
   // ignore: library_private_types_in_public_api
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  TextEditingController username = TextEditingController();
+  TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+  bool _isChecked = false;
   bool? _passwordVisible;
 
-  Future<dynamic> login(String username, String password) async {
+  void login(String email, String password, bool remember) async {
     Map data = {
-      'username': username,
+      'email': email,
       'password': password,
+      'remember': remember,
     };
-    bool remember = false;
-    if ('username' == "" && 'password' == "" && remember == true) {
-      ArtSweetAlert.show(
-          context: context,
-          artDialogArgs: ArtDialogArgs(
-              type: ArtSweetAlertType.danger,
-              title: "Oops!",
-              text: "Campos Vacios"));
+    if (data['email'].isEmpty || data['password'].isEmpty) {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Oops...',
+        text: 'Campos vacios',
+      );
+      Navigator.pop(context);
     }
-    var response = await BaseClient().post('${RestApis.apiCustomer}/login',
-        data, {"Content-Type": "application/json"});
-    if (response.statusCode == 200) {
-      print("***********************************************login");
-      print(response);
-      ArtSweetAlert.show(
-          context: context,
-          artDialogArgs: ArtDialogArgs(
-              type: ArtSweetAlertType.success,
-              title: "Bienvenido!",
-              text: "Iniciaste sesion correctamente"));
+    print('************************this is data login***************');
+    print(data);
+    var response = await BaseClient()
+        .post(RestApis.apiLogin, data, {"Content-Type": "application/json"});
+    print('************************this is data login***************');
+    print(response);
+    final rsp = jsonDecode(response);
+    print('************************this is response decoding***************');
+    print(rsp);
+    if (rsp['type'] == 'error') {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Oops...',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.red,
+        confirmBtnText: 'Reintentar',
+      );
+    }
+    if (rsp['type'] == 'success') {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('userId', rsp['user']['userId'].toString());
+      prefs.setString('fullname', rsp['user']['fullname']);
+      prefs.setString('sessiontoken', rsp['sessiontoken']);
+      prefs.setString('accesstoken', rsp['accesstoken']);
+
       // ignore: use_build_context_synchronously
-      Navigator.pushNamed(context, '/home');
-    } else {
-      ArtSweetAlert.show(
-          context: context,
-          artDialogArgs: ArtDialogArgs(
-              type: ArtSweetAlertType.danger,
-              title: "Oops!",
-              text: "Usuario o contraseña incorrectos"));
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  const SafeArea(child: FRTabbarScreen())),
+          (Route<dynamic> route) => false);
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        title: 'Bienvenido',
+        text: '${rsp['user']['fullname']} ' '${rsp['message']}',
+        confirmBtnColor: Colors.green,
+        confirmBtnText: 'Continuar',
+      );
     }
   }
 
   @override
   void initState() {
     super.initState();
-    username = TextEditingController();
+    email = TextEditingController();
     password = TextEditingController();
     _passwordVisible = true;
+    _isChecked = false;
   }
 
   @override
@@ -93,13 +122,6 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(height: size.height * 0.03),
             ChangeNotifierProvider(
                 create: (_) => LoginFormProvider(), child: _loginForm()),
-            // SwitchListTile(
-            //     value: Preferences.remember,
-            //     onChanged: (value) {
-            //       Preferences.remember = value;
-            //       setState(() {});
-            //     },
-            //     title: const Text('Recordar usuario')),
           ],
         ),
       ),
@@ -115,11 +137,12 @@ class _LoginScreenState extends State<LoginScreen> {
         SizedBox(height: size.height * 0.01),
         _crearPassword(),
         SizedBox(height: size.height * 0.03),
+        remember(),
         RoundedButton(
           color: color3,
           text: "INGRESA ",
           press: () {
-            login(username.text, password.text);
+            login(email.text, password.text, _isChecked);
             FocusScope.of(context).unfocus();
           },
         ),
@@ -131,28 +154,34 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _crearUsuario() {
     final loginForm = Provider.of<LoginFormProvider>(context);
     return Container(
-      margin: const EdgeInsets.only(left: 35, right: 50),
-      child: TextField(
+      margin: const EdgeInsets.only(left: 25, right: 25),
+      child: TextFormField(
         autocorrect: false,
-        keyboardType: TextInputType.text,
-        onChanged: (value) => loginForm.usuario = value,
-        // validator: (value) {
-        //   String pattern =
-        //       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-        //   RegExp regExp = new RegExp(pattern);
-
-        //   return regExp.hasMatch(value ?? '')
-        //       ? null
-        //       : 'El valor ingresado no luce como un correo';
-        // },
-        style: const TextStyle(color: Colors.white),
-        controller: username,
+        keyboardType: TextInputType.emailAddress,
+        onChanged: (value) => loginForm.email = value,
+        validator: (value) {
+          String pattern =
+              r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+          RegExp regExp = RegExp(pattern);
+          return regExp.hasMatch(value ?? '')
+              ? null
+              : 'El valor ingresado no luce como un correo';
+        },
+        style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Urbanist'),
+        controller: email,
         //cursorColor: firstColor,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: color6, width: 3.0),
               borderRadius: BorderRadius.circular(20)),
-          icon: const Icon(
+          focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: color6, width: 3.0),
+              borderRadius: BorderRadius.circular(20)),
+          prefixIcon: const Icon(
             Icons.person,
             color: color6,
             size: 30,
@@ -172,16 +201,20 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _crearPassword() {
     final loginForm = Provider.of<LoginFormProvider>(context);
     return Container(
-      margin: const EdgeInsets.only(left: 35, right: 50),
-      child: TextField(
+      margin: const EdgeInsets.only(left: 25, right: 25),
+      child: TextFormField(
         autocorrect: false,
         onChanged: (value) => loginForm.password = value,
-        // validator: (value) {
-        //   return (value != null && value.length >= 6)
-        //       ? null
-        //       : 'La contraseña debe de ser de 6 caracteres';
-        // },
-        style: const TextStyle(color: Colors.white),
+        validator: (value) {
+          return (value != null && value.length >= 6)
+              ? null
+              : 'La contraseña debe de ser de 6 caracteres';
+        },
+        style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Urbanist'),
         //keyboardType: TextInputType.,
         controller: password,
         obscureText: _passwordVisible!,
@@ -190,13 +223,16 @@ class _LoginScreenState extends State<LoginScreen> {
           enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: color6, width: 3.0),
               borderRadius: BorderRadius.circular(20)),
+          focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: color6, width: 3.0),
+              borderRadius: BorderRadius.circular(20)),
           hintText: "Contraseña",
           hintStyle: const TextStyle(
               color: color2,
               fontSize: 18,
               fontWeight: FontWeight.bold,
               fontFamily: 'Urbanist'),
-          icon: const Icon(
+          prefixIcon: const Icon(
             Icons.lock,
             color: color6,
             size: 30,
@@ -221,6 +257,48 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           border: InputBorder.none,
         ),
+      ),
+    );
+  }
+
+  Widget remember() {
+    final loginForm = Provider.of<LoginFormProvider>(context);
+    return Container(
+      margin: const EdgeInsets.only(left: 35, right: 50),
+      child: Row(
+        children: [
+          Transform.scale(
+            scale: 1.2,
+            child: Checkbox(
+              fillColor: MaterialStateProperty.all(color3),
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              side: const BorderSide(color: color6, width: 2.0),
+              checkColor: color5,
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
+              value: _isChecked,
+              onChanged: (value) {
+                setState(() {
+                  _isChecked = value!;
+                  loginForm.remember = _isChecked;
+                });
+              },
+              activeColor: color6,
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(left: 15.0),
+            child: Text(
+              'Recordar usuario',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Urbanist'),
+            ),
+          ),
+        ],
       ),
     );
   }

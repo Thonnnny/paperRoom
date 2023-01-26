@@ -22,12 +22,11 @@ class _ProductCardState extends State<ProductCard> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    final data = widget.data;
     const borderRadius = BorderRadius.all(Radius.circular(20));
     return InkWell(
       hoverColor: color4,
       borderRadius: borderRadius,
-      onTap: () => Navigator.pushNamed(context, ShopDetailScreen.route()),
+      onTap: () {},
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -39,7 +38,7 @@ class _ProductCardState extends State<ProductCard> {
             child: Stack(
               children: [
                 Container(
-                    child: Image.network(widget.data.mainImage,
+                    child: Image.network('${widget.data.mainImage}',
                         width: 150, height: 150, fit: BoxFit.cover)),
                 Positioned(
                   child: IconButton(
@@ -62,8 +61,8 @@ class _ProductCardState extends State<ProductCard> {
                 const SizedBox(height: 12),
                 FittedBox(
                   child: Text(
-                    widget.data.name.split('').first.toUpperCase() +
-                        widget.data.name.split('').sublist(1).join(''),
+                    '${widget.data.name.split('').first.toUpperCase()}' +
+                        '${widget.data.name.split('').sublist(1).join('')}',
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: color6,

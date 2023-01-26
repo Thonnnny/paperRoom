@@ -1,25 +1,57 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freshbuyer/bloc/cart/bloc/cart_event.dart';
 import 'package:meta/meta.dart';
 
 import '../../../model/productElement.dart';
 
-part 'cart_event.dart';
 part 'cart_state.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
-  CartBloc() : super(CartInitial()) {
-    on<AddToCart>((event, emit) {
-      emit(CartAdded(event.product));
-      // _productItems.add(event.productIndex);
-      // emit(CartAdded(newProduct: _productItems));
+  @override
+  CartState get initialState => CartEmpty();
+
+  CartBloc() : super(CartEmpty()) {
+    on<AddProduct>((event, emit) {
+      if (state is CartLoaded) {
+        final List<Product> newProducts =
+            List.from((state as CartLoaded).products)..add(event.product);
+        emit(CartLoaded(newProducts));
+      } else {
+        final List<Product> newProducts = [event.product];
+        emit(CartLoaded(newProducts));
+      }
     });
 
-    // on<RemoveFromCart>((event, emit) {
-    //   _productItems.remove(event.productIndex);
-    //   emit(CartRemoved(product: _productItems));
-    // });
+    on<RemoveProduct>((event, emit) {
+      if (state is CartLoaded) {
+        final List<Product> newProducts =
+            List.from((state as CartLoaded).products)..remove(event.product);
+        emit(CartLoaded(newProducts));
+      }
+    });
+
+    on<ClearCart>((event, emit) {
+      emit(CartEmpty());
+    });
   }
 
-  // final List<Product> _productItems = [];
-  // List<Product> get items => _productItems;
+  //@override
+  // Stream<CartState> mapEventToState(CartEvent event) async* {
+  //   if (event is AddProduct) {
+  //     if (state is CartLoaded) {
+  //       final List<Product> newProducts =
+  //           List.from((state as CartLoaded).products)..add(event.product);
+  //       yield CartLoaded(newProducts);
+  //     } else {
+  //       final List<Product> newProducts = [event.product];
+  //       yield CartLoaded(newProducts);
+  //     }
+  //   } else if (event is RemoveProduct) {
+  //     if (state is CartLoaded) {
+  //       final List<Product> newProducts =
+  //           List.from((state as CartLoaded).products)..remove(event.product);
+  //       yield CartLoaded(newProducts);
+  //     }
+  //   }
+  // }
 }

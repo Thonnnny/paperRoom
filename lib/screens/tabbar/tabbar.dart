@@ -9,6 +9,8 @@ import 'package:freshbuyer/screens/test/test_screen.dart';
 import 'package:freshbuyer/size_config.dart';
 
 import '../../bloc/cart/bloc/cart_bloc.dart';
+import '../DetailsOrders/details_orders.dart';
+import '../test/ordersScreen.dart';
 import '../wallet/wallet_screen.dart';
 
 class TabbarItem {
@@ -46,9 +48,9 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
     ),
     BlocBuilder<CartBloc, CartState>(
       builder: (context, state) {
-        return state.existCart
+        return state is CartLoaded && state.products.isNotEmpty
             ? CartScreen(
-                product: state.product!,
+                product: state.products,
               )
             : const Scaffold(
                 backgroundColor: color4,
@@ -62,6 +64,7 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
               );
       },
     ),
+    const HistoryScreen(),
     const TestScreen(title: 'Orders'),
     const WalletScreen(),
     const ProfileScreen(),

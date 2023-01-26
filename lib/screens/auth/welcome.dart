@@ -33,13 +33,16 @@ class WelcomeScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: color2),
               ),
-              const Text(
-                'PAPER ROOM',
-                style: TextStyle(
-                    fontSize: 60,
-                    fontWeight: FontWeight.bold,
-                    color: color6,
-                    fontFamily: 'Urbanist'),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'PAPER ROOM',
+                  style: TextStyle(
+                      fontSize: 45,
+                      fontWeight: FontWeight.bold,
+                      color: color6,
+                      fontFamily: 'Urbanist'),
+                ),
               ),
               Lottie.asset('assets/images/welcome.json'),
               RoundedButton(
@@ -82,7 +85,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               // ignore: prefer_const_literals_to_create_immutables
               Row(children: <Widget>[
-                const SizedBox(width: 100),
+                const SizedBox(width: 60),
                 const Text(
                   'Made with',
                   style: TextStyle(
@@ -107,7 +110,7 @@ class WelcomeScreen extends StatelessWidget {
                   width: 3,
                 ),
                 const Text(
-                  'Mondrian',
+                  'Mondrian ITS',
                   style: TextStyle(
                       color: color6,
                       fontWeight: FontWeight.bold,

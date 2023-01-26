@@ -8,12 +8,11 @@ import '../../model/productElement.dart';
 
 // ignore: must_be_immutable
 class ShopDetailScreen extends StatefulWidget {
-  final Product data;
   const ShopDetailScreen({
     super.key,
     required this.data,
   });
-  static String route() => '/shop_detail';
+  final Product data;
   // ignore: prefer_typing_uninitialized_variables
 
   @override
@@ -21,7 +20,6 @@ class ShopDetailScreen extends StatefulWidget {
 }
 
 class _ShopDetailScreenState extends State<ShopDetailScreen> {
-  late Product data;
   int _quantity = 0;
   int index = 0;
   bool _iscollected = false;
@@ -51,8 +49,8 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                       background: Container(
                         color: color4,
                         child: Image.network(
-                          fit: BoxFit.fill,
                           widget.data.mainImage,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),

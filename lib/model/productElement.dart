@@ -3,6 +3,26 @@ import 'dart:convert';
 import 'package:freshbuyer/model/category.dart';
 import 'package:freshbuyer/model/priceAcurrecy.dart';
 
+class ShopData {
+  List<Product> shopitems;
+
+  ShopData({required this.shopitems});
+
+  void addProduct(Product p) {
+    shopitems.add(p);
+  }
+
+  void removeProduct(Product p) {
+    shopitems.add(p);
+  }
+}
+
+// List<Product> productFromJson(String str) =>
+//     List<Product>.from(json.decode(str).map((x) => Product.fromJson(x)));
+
+// String productToJson(List<Product> data) =>
+//     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
 class Product {
   Product({
     required this.id,
@@ -81,4 +101,43 @@ class Product {
         "createdAt": createdAt.toIso8601String(),
         "__v": v,
       };
+
+  copyWith({
+    String? id,
+    String? name,
+    String? description,
+    int? price,
+    PriceCurrency? priceCurrency,
+    bool? inOffer,
+    String? mainImage,
+    List<dynamic>? images,
+    Category? category,
+    bool? visible,
+    String? sku,
+    int? stock,
+    List<dynamic>? tags,
+    bool? isVariant,
+    String? variantsCode,
+    DateTime? createdAt,
+    int? v,
+  }) =>
+      Product(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        price: price ?? this.price,
+        priceCurrency: priceCurrency ?? this.priceCurrency,
+        inOffer: inOffer ?? this.inOffer,
+        mainImage: mainImage ?? this.mainImage,
+        images: images ?? this.images,
+        category: category ?? this.category,
+        visible: visible ?? this.visible,
+        sku: sku ?? this.sku,
+        stock: stock ?? this.stock,
+        tags: tags ?? this.tags,
+        isVariant: isVariant ?? this.isVariant,
+        variantsCode: variantsCode ?? this.variantsCode,
+        createdAt: createdAt ?? this.createdAt,
+        v: v ?? this.v,
+      );
 }

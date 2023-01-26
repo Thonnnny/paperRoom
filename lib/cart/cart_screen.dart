@@ -9,11 +9,12 @@ import '../components/app_button.dart';
 import '../components/app_text.dart';
 import '../components/item_counter.dart';
 
+import '../components/splashorders_Screen.dart';
 import '../model/productElement.dart';
 import 'checkout_bottom_sheet.dart';
 
 class CartScreen extends StatefulWidget {
-  final Product product;
+  final List<Product> product;
 
   const CartScreen({super.key, required this.product});
 
@@ -22,7 +23,6 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  double height = 110;
   Color borderColor = Color(0xffE2E2E2);
   double borderRadius = 18;
   int amount = 1;
@@ -32,8 +32,15 @@ class _CartScreenState extends State<CartScreen> {
       backgroundColor: color4,
       body: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {
-          return state.existCart
-              ? SafeArea(
+          return state is CartEmpty
+              ? const Center(
+                  child: Text("No hay productos en el carrito",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: color3)),
+                )
+              : SafeArea(
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
@@ -50,83 +57,7 @@ class _CartScreenState extends State<CartScreen> {
                         const Divider(
                           height: 10,
                         ),
-                        Column(
-                          children: [
-                            Container(
-                              height: height,
-                              margin: const EdgeInsets.symmetric(
-                                vertical: 30,
-                              ),
-                              child: IntrinsicHeight(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    imageWidget(),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        AppText(
-                                          text: '${widget.product.name}',
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: color6,
-                                        ),
-                                        const SizedBox(
-                                          height: 5,
-                                        ),
-                                        AppText(
-                                            text: '${widget.product.price}'
-                                                .toString(),
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: color2),
-                                        const SizedBox(
-                                          height: 12,
-                                        ),
-                                        // const Spacer(),
-                                        ItemCounterWidget(
-                                          onAmountChanged: (newAmount) {
-                                            setState(() {
-                                              amount = newAmount;
-                                            });
-                                          },
-                                        )
-                                      ],
-                                    ),
-                                    Column(
-                                      children: [
-                                        const Icon(
-                                          Icons.close,
-                                          color: color3,
-                                          size: 25,
-                                        ),
-                                        const Spacer(
-                                          flex: 5,
-                                        ),
-                                        SizedBox(
-                                          width: 70,
-                                          child: AppText(
-                                            text:
-                                                "\$${getPrice().toStringAsFixed(2)}",
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            textAlign: TextAlign.right,
-                                            color: color3,
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
+                        myProductListCart(context),
                         const Divider(
                           thickness: 1,
                         ),
@@ -134,28 +65,100 @@ class _CartScreenState extends State<CartScreen> {
                       ],
                     ),
                   ),
-                )
-              : const Center(
-                  child: Text("No hay productos en el carrito",
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: color3)),
                 );
         },
       ),
     );
   }
 
-  Widget imageWidget() {
-    return Container(
-      width: 135,
-      child: Image.network('${widget.product.mainImage}'),
+  Widget myProductListCart(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    return ListView.builder(
+      itemCount: widget.product.length,
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      itemBuilder: (context, index) {
+        return Container(
+          height: size.height * 0.2,
+          width: size.width,
+          child: IntrinsicHeight(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  imageWidget(index),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppText(
+                        text: widget.product[index].name,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: color6,
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      AppText(
+                          text: '${widget.product[index].price}'.toString(),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: color2),
+                      const SizedBox(
+                        height: 12,
+                      ),
+                      // const Spacer(),
+                      ItemCounterWidget(
+                        onAmountChanged: (newAmount) {
+                          setState(() {
+                            amount = newAmount;
+                          });
+                        },
+                      )
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      const Icon(
+                        Icons.close,
+                        color: color3,
+                        size: 25,
+                      ),
+                      const Spacer(
+                        flex: 5,
+                      ),
+                      SizedBox(
+                        width: 70,
+                        child: AppText(
+                          text: "\$${getPrice(index).toStringAsFixed(2)}",
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          textAlign: TextAlign.right,
+                          color: color3,
+                        ),
+                      ),
+                      const Spacer(),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
-  int getPrice() {
-    return widget.product.price * amount;
+  Widget imageWidget(int index) {
+    return Container(
+      width: 135,
+      child: Image.network('${widget.product[index].mainImage}'),
+    );
+  }
+
+  int getPrice(int index) {
+    return widget.product[index].price * amount;
   }
 
   Widget getCheckoutButton(BuildContext context) {
@@ -194,7 +197,7 @@ class _CartScreenState extends State<CartScreen> {
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (BuildContext bc) {
-          return const CheckoutBottomSheet();
+          return const SplashOrdersScreen();
         });
   }
 }

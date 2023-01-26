@@ -40,4 +40,18 @@ class ProductResponse {
         "message": message,
         "products": List<dynamic>.from(products.map((x) => x.toJson())),
       };
+
+  copyWith({
+    String? type,
+    String? title,
+    String? message,
+    List<Product>? products,
+  }) {
+    return ProductResponse(
+      type: type ?? this.type,
+      title: title ?? this.title,
+      message: message ?? this.message,
+      products: products ?? this.products,
+    );
+  }
 }
