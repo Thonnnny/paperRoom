@@ -1,12 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freshbuyer/model/productElement.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
-
-import '../bloc/cart/bloc/cart_bloc.dart';
-import '../bloc/cart/bloc/cart_event.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
+import '../helpers/base_client.dart';
+import '../helpers/res_apis.dart';
+import '../screens/detail/detail_screen.dart';
+import 'item_counter.dart';
 
 typedef ProductCardOnTaped = void Function(Product data);
 
@@ -23,6 +25,8 @@ class ProductCardtoCar extends StatefulWidget {
 }
 
 class _ProductCardtoCarState extends State<ProductCardtoCar> {
+  int amount = 1;
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -31,7 +35,15 @@ class _ProductCardtoCarState extends State<ProductCardtoCar> {
     return InkWell(
       hoverColor: color4,
       borderRadius: borderRadius,
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) => SafeArea(
+                        child: ShopDetailScreen(
+                      product: widget.data,
+                    ))),
+            (Route<dynamic> route) => false);
+      },
       child: Column(
         children: [
           Padding(
@@ -87,42 +99,60 @@ class _ProductCardtoCarState extends State<ProductCardtoCar> {
                     ),
                   ),
                 ),
-                Text(
-                  '\$${widget.data.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold, color: color3),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(
+                      '\$${widget.data.price.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: color3),
+                    ),
+                    Text(
+                      '\$${widget.data.price.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: color2),
+                    ),
+                  ],
                 ),
-                Text(
-                  '\$${widget.data.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      decoration: TextDecoration.lineThrough,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: color2),
-                ),
-                ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: color5,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ItemCounterWidget(
+                      onAmountChanged: (newAmount) {
+                        setState(() {
+                          amount = newAmount;
+                        });
+                      },
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: color5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: () {
+                        // BlocProvider.of<CartBloc>(context)
+                        //     .add(AddProduct(widget.data));
+                        addProductToCart(widget.data);
+                      },
+                      child: const Text(
+                        'Agregar al carrito',
+                        style: TextStyle(
+                            color: color3,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Urbanist'),
                       ),
                     ),
-                    onPressed: () {
-                      BlocProvider.of<CartBloc>(context)
-                          .add(AddProduct(widget.data));
-                      QuickAlert.show(
-                        context: context,
-                        title: 'Éxito',
-                        type: QuickAlertType.success,
-                        confirmBtnColor: Colors.green,
-                        confirmBtnText: 'Ok',
-                        text: 'Producto agregado!',
-                      );
-                    },
-                    child: const Text(
-                      'Agregar al carrito',
-                      style: TextStyle(color: color3),
-                    )),
+                  ],
+                ),
                 const SizedBox(height: 20),
                 const Divider(
                   color: color5,
@@ -134,5 +164,45 @@ class _ProductCardtoCarState extends State<ProductCardtoCar> {
         ],
       ),
     );
+  }
+
+  void addProductToCart(Product product) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('accesstoken');
+    Map data = {
+      'productId': widget.data.id,
+      'quantity': amount,
+    };
+
+    print('This is your data: $data');
+    var response = await BaseClient().post(RestApis.cartApi, data,
+        {"Content-Type": "application/json", "accesstoken": token});
+    print(response);
+    var rsp = jsonDecode(response);
+    if (rsp['type'] == 'success') {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        title: 'Exito',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.green,
+        confirmBtnText: 'Aceptar',
+        onConfirmBtnTap: () {
+          Navigator.pop(context);
+        },
+      );
+    } else {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Error',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.red,
+        confirmBtnText: 'Aceptar',
+        onConfirmBtnTap: () {
+          Navigator.pop(context);
+        },
+      );
+    }
   }
 }

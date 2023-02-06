@@ -1,9 +1,11 @@
+import '../../../model/productCartResponse.dart';
 import '../../../model/productElement.dart';
 
 abstract class CartEvent {}
 
 class AddProduct extends CartEvent {
   final Product product;
+
   AddProduct(this.product);
 }
 

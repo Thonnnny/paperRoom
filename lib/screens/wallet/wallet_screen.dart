@@ -39,7 +39,7 @@ Container _paypalCard(context) {
         Radius.circular(5.0),
       ),
       boxShadow: [
-        const BoxShadow(
+        BoxShadow(
             color: color4, offset: Offset(0, 3), blurRadius: 6, spreadRadius: 1)
       ],
     ),

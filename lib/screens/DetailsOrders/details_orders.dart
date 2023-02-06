@@ -6,6 +6,9 @@ import 'package:freshbuyer/constants.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../helpers/base_client.dart';
+import '../../helpers/res_apis.dart';
+
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
@@ -25,7 +28,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     setState(() {
       final int? user = prefs.getInt('userID');
       userID = user;
-      historyState(0, context);
+      //historyState(0, context);
     });
   }
 
@@ -35,38 +38,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
     getUser();
   }
 
-  void historyState(int isHistory, BuildContext context) async {
+  void getCartDetails(int isHistory, BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
-    setState(() {
-      option = isHistory;
-    });
-    Map data = {'option': isHistory, 'userID': userID};
-    // final response = await BaseClient().post(RestApis.history, data,
-    //     {"Content-Type": "application/json", "accessToken": token});
-    // final rsp = jsonDecode(response);
-    // if (rsp['status'] == 'failed') {
-    //   QuickAlert.show(
-    //     context: context,
-    //     type: QuickAlertType.error,
-    //     title: 'Oops...',
-    //     text: '${rsp['msg']}',
-    //     confirmBtnColor: redLight,
-    //     confirmBtnText: 'Reintentar',
-    //   );
-    // } else {
-    //   setState(() {
-    //     arrayhistory = rsp['visitorsHistory'];
-    //   });
-    //   QuickAlert.show(
-    //     context: context,
-    //     type: QuickAlertType.success,
-    //     title: 'Exito',
-    //     text: '${rsp['msg']}',
-    //     confirmBtnColor: greenDark,
-    //     confirmBtnText: 'Aceptar',
-    //   );
-    // }
+    final String? token = prefs.getString('accesstoken');
+
+    final response = await BaseClient().get(RestApis.getCart,
+        {"Content-Type": "application/json", "accesstoken": token});
+    final rsp = jsonDecode(response);
+    if (rsp['type'] == 'success') {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Oops...',
+        text: '${rsp['msg']}',
+        confirmBtnColor: Colors.red,
+        confirmBtnText: 'Reintentar',
+      );
+    } else {
+      setState(() {
+        arrayhistory = rsp['cart'];
+      });
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        title: 'Exito',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.green,
+        confirmBtnText: 'Aceptar',
+      );
+    }
   }
 
   @override
@@ -97,7 +97,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                         onPressed: () {
                           print('this is history button Activo');
-                          historyState(0, context);
+                          //historyState(0, context);
                         },
                         child: Text('Activo',
                             style: TextStyle(
@@ -118,7 +118,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                         onPressed: () {
                           print('this is history button Historial');
-                          historyState(1, context);
+                          //historyState(1, context);
                         },
                         child: Text('Historial',
                             style: TextStyle(

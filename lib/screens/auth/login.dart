@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/helpers/res_apis.dart';
+import 'package:freshbuyer/screens/auth/register.dart';
 import 'package:freshbuyer/screens/tabbar/tabbar.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../constants.dart';
+import '../../components/already_have_account.dart';
 import '../../components/background.dart';
 import '../../components/rounded_button.dart';
 
@@ -104,25 +106,27 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    return Background(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(height: size.height * 0.06),
-            const Text(
-              "INICIA SESIÓN",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 30, color: color6),
-            ),
-            Container(
-                margin:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                child: Lottie.asset('assets/images/login.json')),
-            SizedBox(height: size.height * 0.03),
-            ChangeNotifierProvider(
-                create: (_) => LoginFormProvider(), child: _loginForm()),
-          ],
+    return Scaffold(
+      body: Background(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(height: size.height * 0.06),
+              const Text(
+                "INICIA SESIÓN",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 30, color: color6),
+              ),
+              Container(
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  child: Lottie.asset('assets/images/login.json')),
+              SizedBox(height: size.height * 0.03),
+              ChangeNotifierProvider(
+                  create: (_) => LoginFormProvider(), child: _loginForm()),
+            ],
+          ),
         ),
       ),
     );
@@ -136,8 +140,21 @@ class _LoginScreenState extends State<LoginScreen> {
         _crearUsuario(),
         SizedBox(height: size.height * 0.01),
         _crearPassword(),
-        SizedBox(height: size.height * 0.03),
+        SizedBox(height: size.height * 0.01),
         remember(),
+        AlreadyHaveAnAccountCheck(
+          press: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return const RegisterScreen();
+                },
+              ),
+            );
+          },
+        ),
+        SizedBox(height: size.height * 0.01),
         RoundedButton(
           color: color3,
           text: "INGRESA ",

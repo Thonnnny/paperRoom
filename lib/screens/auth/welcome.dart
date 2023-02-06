@@ -84,40 +84,42 @@ class WelcomeScreen extends StatelessWidget {
                 height: 30,
               ),
               // ignore: prefer_const_literals_to_create_immutables
-              Row(children: <Widget>[
-                const SizedBox(width: 60),
-                const Text(
-                  'Made with',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontFamily: 'Urbanist',
-                      fontWeight: FontWeight.bold),
-                ),
-                const Icon(Icons.favorite, color: color5),
-                const SizedBox(
-                  width: 3,
-                ),
-                const Text(
-                  'by',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontFamily: 'Urbanist',
-                      fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                  width: 3,
-                ),
-                const Text(
-                  'Mondrian ITS',
-                  style: TextStyle(
-                      color: color6,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Urbanist',
-                      fontSize: 15),
-                )
-              ])
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 80.0),
+                child: Row(children: const <Widget>[
+                  Text(
+                    'Made with',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontFamily: 'Urbanist',
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Icon(Icons.favorite, color: color5),
+                  SizedBox(
+                    width: 3,
+                  ),
+                  Text(
+                    'by',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontFamily: 'Urbanist',
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    width: 3,
+                  ),
+                  Text(
+                    'Mondrian ITS',
+                    style: TextStyle(
+                        color: color6,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Urbanist',
+                        fontSize: 15),
+                  )
+                ]),
+              )
             ],
           ),
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freshbuyer/bloc/cart/bloc/cart_event.dart';
+import 'package:freshbuyer/model/productCartResponse.dart';
 import 'package:meta/meta.dart';
 
 import '../../../model/productElement.dart';

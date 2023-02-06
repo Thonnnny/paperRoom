@@ -49,6 +49,7 @@ class _MostPopularScreenState extends State<MostPopularScreen> {
       future: _products,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          Product product = snapshot.data![index];
           return ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             shrinkWrap: true,
@@ -64,7 +65,13 @@ class _MostPopularScreenState extends State<MostPopularScreen> {
                     ],
                   ),
                   onTap: () {
-                    ShopDetailScreen(data: snapshot.data![index]);
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => SafeArea(
+                                    child: ShopDetailScreen(
+                                  product: product,
+                                ))),
+                        (Route<dynamic> route) => false);
                   });
             },
           );

@@ -10,9 +10,10 @@ import '../../model/productElement.dart';
 class ShopDetailScreen extends StatefulWidget {
   const ShopDetailScreen({
     super.key,
-    required this.data,
+    required this.product,
   });
-  final Product data;
+  final Product product;
+
   // ignore: prefer_typing_uninitialized_variables
 
   @override
@@ -49,7 +50,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                       background: Container(
                         color: color4,
                         child: Image.network(
-                          widget.data.mainImage,
+                          '${widget.product.mainImage}',
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -89,7 +90,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            widget.data.name,
+            '${widget.product.name}',
             style: const TextStyle(
                 fontWeight: FontWeight.bold, fontSize: 32, color: color2),
           ),
@@ -147,7 +148,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
               fontSize: 18, fontWeight: FontWeight.bold, color: color5)),
       const SizedBox(height: 8),
       Text(
-        widget.data.description,
+        '${widget.product.description}',
         style: const TextStyle(fontSize: 14, color: color2),
       ),
       // const ExpandableText(
@@ -190,7 +191,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                   },
                 ),
                 const SizedBox(width: 20),
-                Text(widget.data.price.toString(),
+                Text('${widget.product.price.toString()}',
                     style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,

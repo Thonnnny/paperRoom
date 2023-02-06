@@ -7,6 +7,7 @@ class ItemCounterWidget extends StatefulWidget {
   const ItemCounterWidget({Key? key, this.onAmountChanged}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _ItemCounterWidgetState createState() => _ItemCounterWidgetState();
 }
 
@@ -17,15 +18,15 @@ class _ItemCounterWidgetState extends State<ItemCounterWidget> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        iconWidget(Icons.remove, iconColor: color6, onPressed: decrementAmount),
+        iconWidget(Icons.remove, iconColor: color3, onPressed: decrementAmount),
         const SizedBox(width: 18),
         SizedBox(
-            width: 30,
+            width: 10,
             child: Center(
                 child: getText(
                     text: amount.toString(), fontSize: 18, isBold: true))),
         const SizedBox(width: 18),
-        iconWidget(Icons.add, iconColor: color6, onPressed: incrementAmount)
+        iconWidget(Icons.add, iconColor: color3, onPressed: incrementAmount)
       ],
     );
   }

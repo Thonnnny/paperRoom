@@ -10,7 +10,7 @@ import 'package:freshbuyer/size_config.dart';
 
 import '../../bloc/cart/bloc/cart_bloc.dart';
 import '../DetailsOrders/details_orders.dart';
-import '../test/ordersScreen.dart';
+
 import '../wallet/wallet_screen.dart';
 
 class TabbarItem {
@@ -46,23 +46,8 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
     const HomeScreen(
       title: '首页0',
     ),
-    BlocBuilder<CartBloc, CartState>(
-      builder: (context, state) {
-        return state is CartLoaded && state.products.isNotEmpty
-            ? CartScreen(
-                product: state.products,
-              )
-            : const Scaffold(
-                backgroundColor: color4,
-                body: Center(
-                  child: Text("No hay productos en el carrito",
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: color3)),
-                ),
-              );
-      },
+    const CartScreen(
+      product: [],
     ),
     const HistoryScreen(),
     const TestScreen(title: 'Orders'),

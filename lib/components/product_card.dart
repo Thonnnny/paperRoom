@@ -24,29 +24,39 @@ class _ProductCardState extends State<ProductCard> {
     var size = MediaQuery.of(context).size;
     const borderRadius = BorderRadius.all(Radius.circular(20));
     return InkWell(
-      hoverColor: color4,
+      hoverColor: color1,
       borderRadius: borderRadius,
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) => SafeArea(
+                        child: ShopDetailScreen(
+                      product: widget.data,
+                    ))),
+            (Route<dynamic> route) => false);
+      },
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             decoration: const BoxDecoration(
               borderRadius: borderRadius,
-              color: color5,
             ),
             child: Stack(
               children: [
-                Container(
-                    child: Image.network('${widget.data.mainImage}',
-                        width: 150, height: 150, fit: BoxFit.cover)),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                      child: Image.network('${widget.data.mainImage}',
+                          width: 150, height: 150, fit: BoxFit.cover)),
+                ),
                 Positioned(
                   child: IconButton(
                     onPressed: () =>
                         setState(() => _iscollected = !_iscollected),
                     icon: Image.asset(
                         'assets/icons/${_iscollected ? 'bold' : 'light'}/heart@2x.png',
-                        color: color2),
+                        color: color6),
                     iconSize: 28,
                   ),
                 )
@@ -55,15 +65,16 @@ class _ProductCardState extends State<ProductCard> {
           ),
           Container(
             width: size.width * 0.5,
-            height: size.height * 0.2,
             child: Column(
               children: [
                 const SizedBox(height: 12),
-                FittedBox(
+                Container(
+                  width: size.width,
+                  height: size.height * 0.085,
                   child: Text(
-                    '${widget.data.name.split('').first.toUpperCase()}' +
-                        '${widget.data.name.split('').sublist(1).join('')}',
-                    overflow: TextOverflow.ellipsis,
+                    '${widget.data.name.split('').first.toUpperCase() + widget.data.name.split('').sublist(1).join('')}',
+                    //overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: color6,
                       fontWeight: FontWeight.bold,
@@ -74,13 +85,45 @@ class _ProductCardState extends State<ProductCard> {
                 const SizedBox(
                   height: 10,
                 ),
-                _buildSoldPoint(4.5, 6937),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: _buildSoldPoint(4.5, 6937),
+                ),
                 const SizedBox(height: 10),
                 Text(
                   '\$${widget.data.price.toStringAsFixed(2)}',
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold, color: color2),
-                )
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    const Text(
+                      'Envios por el país',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: color6),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      '|',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: color6,
+                          fontSize: 14),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Entrega 24h',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: color6),
+                    ),
+                  ],
+                ),
               ],
             ),
           )

@@ -8,6 +8,4 @@ const color3 = Color(0xFF1d1313);
 const color4 = Color(0xFFf7d7db);
 const color5 = Color(0xFFf9bdc2);
 const color6 = Color(0xFFd09c0e);
-////////////////////////////////PATHS////////////////////////////////
-
-const String apiPath = 'https://api.ecomondrianits.com/';
+////////////////////////////////PATHS///////////////////////////////////////////

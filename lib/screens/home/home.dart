@@ -1,13 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freshbuyer/bloc/shop/shop_bloc.dart';
 import 'package:freshbuyer/components/product_card.dart';
 import 'package:freshbuyer/constants.dart';
-import 'package:freshbuyer/helpers/base_client.dart';
-import 'package:freshbuyer/helpers/res_apis.dart';
-import 'package:freshbuyer/model/productResponse.dart';
 import 'package:freshbuyer/screens/detail/detail_screen.dart';
 import 'package:freshbuyer/screens/home/hearder.dart';
 import 'package:freshbuyer/screens/home/most_popular.dart';
@@ -18,7 +11,6 @@ import 'package:freshbuyer/screens/special_offers/special_offers_screen.dart';
 import 'package:freshbuyer/class/classApi.dart';
 
 import '../../model/productElement.dart';
-import '../UI/shopping_cart.dart';
 
 class HomeScreen extends StatefulWidget {
   final String title;
@@ -115,26 +107,34 @@ class _HomeScreenState extends State<HomeScreen> {
       future: _products,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          Product product = snapshot.data![index];
           return ListView.builder(
             shrinkWrap: true,
             scrollDirection: Axis.vertical,
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
-              return GestureDetector(
-                  child: Stack(
-                    children: <Widget>[
-                      ProductCard(
-                        data: snapshot.data![index],
-                      )
-                    ],
-                  ),
-                  onTap: () {
-                    print(snapshot.data![index].id);
-                    print('this is your home shopdetailscreen');
-                    ShopDetailScreen(
-                      data: snapshot.data![index],
-                    );
-                  });
+              return Card(
+                elevation: 10,
+                color: Colors.white,
+                child: GestureDetector(
+                    child: Stack(
+                      children: <Widget>[
+                        ProductCard(
+                          data: snapshot.data![index],
+                        )
+                      ],
+                    ),
+                    onTap: () {
+                      print('this is the route for product');
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                              builder: (BuildContext context) => SafeArea(
+                                      child: ShopDetailScreen(
+                                    product: product,
+                                  ))),
+                          (Route<dynamic> route) => false);
+                    }),
+              );
             },
           );
         } else if (snapshot.hasError) {

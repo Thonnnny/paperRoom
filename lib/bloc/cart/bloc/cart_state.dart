@@ -41,3 +41,8 @@ class CartLoaded extends CartState {
   final List<Product> products;
   CartLoaded(this.products);
 }
+
+class TotalPrice extends CartState {
+  final double totalPrice;
+  TotalPrice(this.totalPrice);
+}

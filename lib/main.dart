@@ -5,11 +5,10 @@ import 'package:freshbuyer/bloc/orders/bloc/orders_bloc.dart';
 import 'package:freshbuyer/bloc/product/bloc/product_bloc.dart';
 import 'package:freshbuyer/bloc/shop/shop_bloc.dart';
 import 'package:freshbuyer/bloc/user/bloc/user_bloc.dart';
-import 'package:freshbuyer/components/push_notification.dart';
 import 'package:freshbuyer/providers/login_provider.dart';
 import 'package:freshbuyer/providers/orders_provider.dart';
-import 'package:freshbuyer/routes.dart';
-import 'package:freshbuyer/screens/auth/login.dart';
+import 'package:freshbuyer/providers/register_provider.dart';
+
 import 'package:freshbuyer/screens/auth/validateToken.dart';
 import 'package:freshbuyer/screens/tabbar/tabbar.dart';
 import 'package:freshbuyer/theme.dart';
@@ -20,14 +19,13 @@ import 'components/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  //await PushNotificationService.initializeApp();
   ValidateToken validateToken = ValidateToken();
   await validateToken.handleSession();
-  //await PushNotificationService.initializeApp();
   runApp(const PaperRoomApp());
 }
 
 var prefs = SharedPreferences.getInstance();
-bool? validateUser;
 
 class PaperRoomApp extends StatefulWidget {
   const PaperRoomApp({super.key});
@@ -37,12 +35,12 @@ class PaperRoomApp extends StatefulWidget {
 }
 
 class _PaperRoomAppState extends State<PaperRoomApp> {
+  bool? validateUser;
   void getSaveToken() async {
     final prefs = await SharedPreferences.getInstance();
     final bool? saveToken = prefs.getBool('savetoken');
     validateUser = saveToken;
-    print('*************************this is the token*********************');
-    print(validateUser);
+    print('This is the save token bool $validateUser');
   }
 
   @override
@@ -75,20 +73,19 @@ class _PaperRoomAppState extends State<PaperRoomApp> {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: LoginFormProvider()),
+          ChangeNotifierProvider.value(value: RegisterFormProvider()),
           ChangeNotifierProvider.value(value: OrderFormProvider()),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Fresh-Buyer',
           theme: appTheme(),
-          initialRoute: validateUser == false || validateUser == null
-              ? '/login'
-              : validateUser == true
-                  ? '/home'
-                  : '/login',
+          initialRoute:
+              validateUser == false ? '/login' : '/home', //'/login', //'/home',
           routes: {
             '/login': (BuildContext context) => const SplashScreen(),
-            '/home': (BuildContext context) => const FRTabbarScreen(),
+            '/home': (BuildContext context) =>
+                const SafeArea(child: FRTabbarScreen()),
           },
         ),
       ),
