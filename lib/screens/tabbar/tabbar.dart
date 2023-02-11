@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freshbuyer/cart/cart_screen.dart';
 import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/image_loader.dart';
@@ -8,7 +7,6 @@ import 'package:freshbuyer/screens/profile/profile_screen.dart';
 import 'package:freshbuyer/screens/test/test_screen.dart';
 import 'package:freshbuyer/size_config.dart';
 
-import '../../bloc/cart/bloc/cart_bloc.dart';
 import '../DetailsOrders/details_orders.dart';
 
 import '../wallet/wallet_screen.dart';
@@ -106,17 +104,20 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
         body: screens[_select],
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: color3,
+          iconSize: 24,
+          type: BottomNavigationBarType.fixed,
           items: items,
+          enableFeedback: true,
           onTap: ((value) => setState(() => _select = value)),
           currentIndex: _select,
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 10,
+            fontSize: 12,
           ),
           showUnselectedLabels: false,
           unselectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.normal,
-            fontSize: 10,
+            fontSize: 12,
           ),
           selectedItemColor: color5,
           unselectedItemColor: color5,

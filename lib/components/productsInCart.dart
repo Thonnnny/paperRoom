@@ -1,24 +1,69 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:freshbuyer/model/cartResponses.dart';
+import 'package:freshbuyer/model/productCartResponse.dart';
 import 'package:freshbuyer/model/productElement.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants.dart';
+import '../helpers/base_client.dart';
+import '../helpers/res_apis.dart';
 import '../screens/detail/detail_screen.dart';
 
-typedef ProductCardOnTaped = void Function(Product data);
+typedef ProductinCardOnTaped = void Function(Product data);
 
 bool _iscollected = false;
 
-class ProductCard extends StatefulWidget {
-  const ProductCard({super.key, required this.data, this.ontap});
+class ProductInCardOrder extends StatefulWidget {
+  const ProductInCardOrder({super.key, required this.data, this.ontap});
 
-  final Product data;
-  final ProductCardOnTaped? ontap;
+  final Item data;
+  final ProductinCardOnTaped? ontap;
 
   @override
-  State<ProductCard> createState() => _ProductCardState();
+  State<ProductInCardOrder> createState() => _ProductInCardOrderState();
 }
 
-class _ProductCardState extends State<ProductCard> {
+class _ProductInCardOrderState extends State<ProductInCardOrder> {
+  void removeProductFromCart(Item data) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('accesstoken');
+    var idProduct = data.id;
+    print(token);
+    print('This is your $idProduct to remove of cart');
+    var response = await BaseClient().post(
+        RestApis.apiRemoveProductFromOrder,
+        {"Content-Type": "application/json", "accesstoken": token},
+        {"id": idProduct});
+    var rsp = jsonDecode(response);
+    print('this is your response of remove product $rsp');
+    if (rsp['type'] == "success") {
+      print('remove product successful');
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        title: 'Cerrando sesión',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.green,
+        confirmBtnText: 'Continuar',
+      );
+      Navigator.pushReplacementNamed(context, '/cart');
+    } else {
+      print('remove product failed');
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Oops...',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.red,
+        confirmBtnText: 'Reintentar',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -26,15 +71,7 @@ class _ProductCardState extends State<ProductCard> {
     return InkWell(
       hoverColor: color1,
       borderRadius: borderRadius,
-      onTap: () {
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (BuildContext context) => SafeArea(
-                        child: ShopDetailScreen(
-                      product: widget.data,
-                    ))),
-            (Route<dynamic> route) => false);
-      },
+      onTap: () {},
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -71,19 +108,17 @@ class _ProductCardState extends State<ProductCard> {
                 ),
                 Positioned(
                   child: IconButton(
-                    onPressed: () =>
-                        setState(() => _iscollected = !_iscollected),
-                    icon: Image.asset(
-                        'assets/icons/${_iscollected ? 'bold' : 'light'}/heart@2x.png',
-                        color: color6),
-                    iconSize: 28,
+                    icon: const Icon(Icons.delete, color: color6, size: 30),
+                    onPressed: () {
+                      removeProductFromCart(widget.data);
+                    },
                   ),
                 )
               ],
             ),
           ),
           Container(
-            width: size.width * 0.5,
+            width: size.width * 0.4,
             child: Column(
               children: [
                 const SizedBox(height: 12),
@@ -91,11 +126,11 @@ class _ProductCardState extends State<ProductCard> {
                   width: size.width,
                   height: size.height * 0.085,
                   child: Text(
-                    '${widget.data.name.split('').first.toUpperCase() + widget.data.name.split('').sublist(1).join('')}',
+                    '${widget.data.productName!.split('').first.toUpperCase() + widget.data.productName!.split('').sublist(1).join('')}',
                     //overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      color: color6,
+                      color: color3,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
@@ -104,42 +139,44 @@ class _ProductCardState extends State<ProductCard> {
                 const SizedBox(
                   height: 10,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: _buildSoldPoint(4.5, 6937),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  '\$${widget.data.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold, color: color2),
-                ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  // ignore: prefer_const_literals_to_create_immutables
                   children: [
                     const Text(
-                      'Envios por el país',
+                      textAlign: TextAlign.right,
+                      "Cantidad:",
                       style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: color6),
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: color6,
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      '|',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: color6,
-                          fontSize: 14),
+                    const SizedBox(width: 10),
+                    Text(
+                      textAlign: TextAlign.right,
+                      "${widget.data.quantity}",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: color6,
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                  ],
+                ),
+                Row(
+                  children: [
                     const Text(
-                      'Entrega 24h',
+                      'Precio por unidad:',
                       style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: color6),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: color3),
+                    ),
+                    Text(
+                      '\$${widget.data.productBilledPrice}',
+                      style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: color3),
                     ),
                   ],
                 ),

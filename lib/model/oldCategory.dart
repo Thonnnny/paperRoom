@@ -1,9 +1,23 @@
+import 'package:flutter/cupertino.dart';
+
 class Category {
   const Category(this.icon, this.title, this.id);
 
   final String icon;
   final String title;
   final String id;
+
+  factory Category.fromJson(Map<String, dynamic> json) => Category(
+        json["icon"],
+        json["title"],
+        json["id"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "title": title,
+        "icon": icon,
+      };
 }
 
 final homeCategries = <Category>[

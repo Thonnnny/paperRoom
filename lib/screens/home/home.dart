@@ -83,9 +83,21 @@ class _HomeScreenState extends State<HomeScreen> {
         MostPopularTitle(onTapseeAll: () {
           _onTapMostPopularSeeAll(context);
         }),
+        _buildLine(),
         const SizedBox(height: 24),
         const MostPupularCategory(),
       ],
+    );
+  }
+
+  Widget _buildLine() {
+    return Container(
+      height: 2,
+      width: 40,
+      decoration: const BoxDecoration(
+        color: color3,
+        borderRadius: BorderRadius.all(Radius.circular(2)),
+      ),
     );
   }
 
@@ -107,15 +119,17 @@ class _HomeScreenState extends State<HomeScreen> {
       future: _products,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          Product product = snapshot.data![index];
           return ListView.builder(
             shrinkWrap: true,
             scrollDirection: Axis.vertical,
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
                 elevation: 10,
-                color: Colors.white,
+                color: color2,
                 child: GestureDetector(
                     child: Stack(
                       children: <Widget>[
@@ -124,23 +138,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         )
                       ],
                     ),
-                    onTap: () {
-                      print('this is the route for product');
-                      Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (BuildContext context) => SafeArea(
-                                      child: ShopDetailScreen(
-                                    product: product,
-                                  ))),
-                          (Route<dynamic> route) => false);
-                    }),
+                    onTap: () {}),
               );
             },
           );
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");
         }
-        return const CircularProgressIndicator();
+        return const CircularProgressIndicator(
+          color: color5,
+          strokeWidth: 5,
+        );
       },
     );
   }
@@ -153,6 +161,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onTapSpecialOffersSeeAll(BuildContext context) {
-    Navigator.pushNamed(context, SpecialOfferScreen.route());
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (BuildContext context) => const SpecialOfferScreen(
+                  datas: [],
+                )),
+        (Route<dynamic> route) => false);
   }
 }

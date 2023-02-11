@@ -88,21 +88,21 @@ class WelcomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 80.0),
                 child: Row(children: const <Widget>[
                   Text(
-                    'Made with',
+                    'Powered with',
                     style: TextStyle(
-                        color: Colors.white,
+                        color: color3,
                         fontSize: 15,
                         fontFamily: 'Urbanist',
                         fontWeight: FontWeight.bold),
                   ),
-                  Icon(Icons.favorite, color: color5),
+                  Icon(Icons.flash_on, color: color6),
                   SizedBox(
                     width: 3,
                   ),
                   Text(
                     'by',
                     style: TextStyle(
-                        color: Colors.white,
+                        color: color3,
                         fontSize: 15,
                         fontFamily: 'Urbanist',
                         fontWeight: FontWeight.bold),

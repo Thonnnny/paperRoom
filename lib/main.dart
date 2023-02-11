@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freshbuyer/bloc/cart/bloc/cart_bloc.dart';
-import 'package:freshbuyer/bloc/orders/bloc/orders_bloc.dart';
-import 'package:freshbuyer/bloc/product/bloc/product_bloc.dart';
-import 'package:freshbuyer/bloc/shop/shop_bloc.dart';
-import 'package:freshbuyer/bloc/user/bloc/user_bloc.dart';
 import 'package:freshbuyer/providers/login_provider.dart';
 import 'package:freshbuyer/providers/orders_provider.dart';
 import 'package:freshbuyer/providers/register_provider.dart';
@@ -41,6 +35,9 @@ class _PaperRoomAppState extends State<PaperRoomApp> {
     final bool? saveToken = prefs.getBool('savetoken');
     validateUser = saveToken;
     print('This is the save token bool $validateUser');
+    if (validateUser == null) {
+      (BuildContext context) => const SplashScreen();
+    }
   }
 
   @override
@@ -52,42 +49,24 @@ class _PaperRoomAppState extends State<PaperRoomApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiProvider(
       providers: [
-        BlocProvider(
-          create: (context) => UserBloc(),
-        ),
-        BlocProvider(
-          create: (context) => CartBloc(),
-        ),
-        BlocProvider(
-          create: (context) => ProductBloc(),
-        ),
-        BlocProvider(
-          create: (context) => OrdersBloc(),
-        ),
-        BlocProvider(
-          create: (context) => ShopBloc(),
-        ),
+        ChangeNotifierProvider.value(value: LoginFormProvider()),
+        ChangeNotifierProvider.value(value: RegisterFormProvider()),
+        ChangeNotifierProvider.value(value: OrderFormProvider()),
       ],
-      child: MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: LoginFormProvider()),
-          ChangeNotifierProvider.value(value: RegisterFormProvider()),
-          ChangeNotifierProvider.value(value: OrderFormProvider()),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Fresh-Buyer',
-          theme: appTheme(),
-          initialRoute:
-              validateUser == false ? '/login' : '/home', //'/login', //'/home',
-          routes: {
-            '/login': (BuildContext context) => const SplashScreen(),
-            '/home': (BuildContext context) =>
-                const SafeArea(child: FRTabbarScreen()),
-          },
-        ),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Fresh-Buyer',
+        theme: appTheme(),
+        initialRoute: validateUser == false && validateUser == null
+            ? '/login'
+            : '/home', //'/login', //'/home',
+        routes: {
+          '/login': (BuildContext context) => const SplashScreen(),
+          '/home': (BuildContext context) =>
+              const SafeArea(child: FRTabbarScreen()),
+        },
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/helpers/res_apis.dart';
 import 'package:freshbuyer/screens/auth/register.dart';
+import 'package:freshbuyer/screens/auth/welcome.dart';
 import 'package:freshbuyer/screens/tabbar/tabbar.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -12,11 +13,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../constants.dart';
 import '../../components/already_have_account.dart';
-import '../../components/background.dart';
-import '../../components/rounded_button.dart';
 
 import '../../helpers/base_client.dart';
 import '../../providers/login_provider.dart';
+import '../../size_config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -41,55 +41,56 @@ class _LoginScreenState extends State<LoginScreen> {
       'password': password,
       'remember': remember,
     };
-    if (data['email'].isEmpty || data['password'].isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       QuickAlert.show(
         context: context,
         type: QuickAlertType.error,
         title: 'Oops...',
         text: 'Campos vacios',
-      );
-      Navigator.pop(context);
-    }
-    print('************************this is data login***************');
-    print(data);
-    var response = await BaseClient()
-        .post(RestApis.apiLogin, data, {"Content-Type": "application/json"});
-    print('************************this is data login***************');
-    print(response);
-    final rsp = jsonDecode(response);
-    print('************************this is response decoding***************');
-    print(rsp);
-    if (rsp['type'] == 'error') {
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Oops...',
-        text: '${rsp['message']}',
         confirmBtnColor: Colors.red,
         confirmBtnText: 'Reintentar',
+        onConfirmBtnTap: () {
+          Navigator.pop(context);
+        },
       );
-    }
-    if (rsp['type'] == 'success') {
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString('userId', rsp['user']['userId'].toString());
-      prefs.setString('fullname', rsp['user']['fullname']);
-      prefs.setString('sessiontoken', rsp['sessiontoken']);
-      prefs.setString('accesstoken', rsp['accesstoken']);
-
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  const SafeArea(child: FRTabbarScreen())),
-          (Route<dynamic> route) => false);
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.success,
-        title: 'Bienvenido',
-        text: '${rsp['user']['fullname']} ' '${rsp['message']}',
-        confirmBtnColor: Colors.green,
-        confirmBtnText: 'Continuar',
-      );
+    } else {
+      print('************************this is data login***************$data');
+      var response = await BaseClient()
+          .post(RestApis.apiLogin, data, {"Content-Type": "application/json"});
+      final rsp = jsonDecode(response);
+      print(
+          '************************this is response decoding***************$rsp');
+      if (rsp['type'] == 'error') {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Oops...',
+          text: '${rsp['message']}',
+          confirmBtnColor: Colors.red,
+          confirmBtnText: 'Reintentar',
+        );
+      }
+      if (rsp['type'] == 'success') {
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString('userId', rsp['user']['userId'].toString());
+        prefs.setString('fullname', rsp['user']['fullname']);
+        prefs.setString('sessiontoken', rsp['sessiontoken']);
+        prefs.setString('accesstoken', rsp['accesstoken']);
+        // ignore: use_build_context_synchronously
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    const SafeArea(child: FRTabbarScreen())),
+            (Route<dynamic> route) => false);
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          title: 'Bienvenido',
+          text: '${rsp['user']['fullname']} ' '${rsp['message']}',
+          confirmBtnColor: Colors.green,
+          confirmBtnText: 'Continuar',
+        );
+      }
     }
   }
 
@@ -107,29 +108,86 @@ class _LoginScreenState extends State<LoginScreen> {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: Background(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(height: size.height * 0.06),
-              const Text(
-                "INICIA SESIÓN",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 30, color: color6),
+      body: SafeArea(
+        child: Container(
+          color: color4,
+          child: Stack(
+            children: [
+              CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    expandedHeight: getProportionateScreenHeight(428),
+                    leading: IconButton(
+                      icon: Image.asset(
+                        'assets/icons/back@2x.png',
+                        scale: 1,
+                        color: color4,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    const WelcomeScreen()),
+                            (Route<dynamic> route) => false);
+                      },
+                    ),
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                          color: color4,
+                          child: Lottie.asset('assets/images/login.json')),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ..._buildTitle(),
+                          const SizedBox(height: 10),
+                          _buildLine(),
+                          const SizedBox(height: 30),
+                          ChangeNotifierProvider(
+                              create: (_) => LoginFormProvider(),
+                              child: _loginForm()),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Container(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  child: Lottie.asset('assets/images/login.json')),
-              SizedBox(height: size.height * 0.03),
-              ChangeNotifierProvider(
-                  create: (_) => LoginFormProvider(), child: _loginForm()),
             ],
           ),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildTitle() {
+    var size = MediaQuery.of(context).size;
+    return <Widget>[
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: size.width * 0.75,
+            child: const Center(
+              child: Text(
+                'Inicio de sesión',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 32, color: color3),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
+  }
+
+  Widget _buildLine() {
+    return Container(height: 3, color: color6);
   }
 
   Widget _loginForm() {
@@ -138,10 +196,11 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
       children: [
         _crearUsuario(),
-        SizedBox(height: size.height * 0.01),
+        SizedBox(height: size.height * 0.02),
         _crearPassword(),
         SizedBox(height: size.height * 0.01),
         remember(),
+        SizedBox(height: size.height * 0.01),
         AlreadyHaveAnAccountCheck(
           press: () {
             Navigator.push(
@@ -154,14 +213,30 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           },
         ),
-        SizedBox(height: size.height * 0.01),
-        RoundedButton(
-          color: color3,
-          text: "INGRESA ",
-          press: () {
+        const SizedBox(height: 20),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50),
+            ),
+            backgroundColor: color3,
+            padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
+            textStyle: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () {
             login(email.text, password.text, _isChecked);
             FocusScope.of(context).unfocus();
           },
+          child: const Text('INGRESA',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: color2,
+                fontFamily: 'Urbanist',
+              )),
         ),
         SizedBox(height: size.height * 0.03),
       ],
@@ -171,7 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _crearUsuario() {
     final loginForm = Provider.of<LoginFormProvider>(context);
     return Container(
-      margin: const EdgeInsets.only(left: 25, right: 25),
+      margin: const EdgeInsets.only(left: 15, right: 15),
       child: TextFormField(
         autocorrect: false,
         keyboardType: TextInputType.emailAddress,
@@ -193,10 +268,10 @@ class _LoginScreenState extends State<LoginScreen> {
         //cursorColor: firstColor,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: color6, width: 3.0),
+              borderSide: const BorderSide(color: color6, width: 2.0),
               borderRadius: BorderRadius.circular(20)),
           focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: color6, width: 3.0),
+              borderSide: const BorderSide(color: color6, width: 2.0),
               borderRadius: BorderRadius.circular(20)),
           prefixIcon: const Icon(
             Icons.person,
@@ -218,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _crearPassword() {
     final loginForm = Provider.of<LoginFormProvider>(context);
     return Container(
-      margin: const EdgeInsets.only(left: 25, right: 25),
+      margin: const EdgeInsets.only(left: 15, right: 15),
       child: TextFormField(
         autocorrect: false,
         onChanged: (value) => loginForm.password = value,
@@ -238,10 +313,10 @@ class _LoginScreenState extends State<LoginScreen> {
         cursorColor: Colors.white,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: color6, width: 3.0),
+              borderSide: const BorderSide(color: color6, width: 2.0),
               borderRadius: BorderRadius.circular(20)),
           focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: color6, width: 3.0),
+              borderSide: const BorderSide(color: color6, width: 2.0),
               borderRadius: BorderRadius.circular(20)),
           hintText: "Contraseña",
           hintStyle: const TextStyle(
@@ -281,7 +356,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget remember() {
     final loginForm = Provider.of<LoginFormProvider>(context);
     return Container(
-      margin: const EdgeInsets.only(left: 35, right: 50),
+      margin: const EdgeInsets.only(left: 20, right: 50),
       child: Row(
         children: [
           Transform.scale(
@@ -304,16 +379,13 @@ class _LoginScreenState extends State<LoginScreen> {
               activeColor: color6,
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(left: 15.0),
-            child: Text(
-              'Recordar usuario',
-              style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Urbanist'),
-            ),
+          const Text(
+            'Recordar usuario',
+            style: TextStyle(
+                color: color2,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Urbanist'),
           ),
         ],
       ),

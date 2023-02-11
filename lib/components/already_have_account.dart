@@ -29,7 +29,7 @@ class AlreadyHaveAnAccountCheck extends StatelessWidget {
           child: Text(
             login ?? false ? "Regístrate aquí" : "Ingresa aquí",
             style: const TextStyle(
-              color: color3,
+              color: color2,
               fontWeight: FontWeight.bold,
             ),
           ),

@@ -84,6 +84,19 @@ class BaseClient {
       case 401: //Unauthorized
       case 403: //Forbidden
       case 404: //Resource Not Found
+      case 405: //Method Not Allowed
+      case 406: //Not Acceptable
+      case 408: //Request Timeout
+      case 409: //Conflict
+      case 410: //Gone
+      case 411: //Length Required
+      case 412: //Precondition Failed
+      case 413: //Request Entity Too Large
+      case 414: //Request-URI Too Long
+      case 415: //Unsupported Media Type
+      case 416: //Requested Range Not Satisfiable
+      case 417: //Expectation Failed
+      case 422: //Unprocessable Entity
       case 500:
         var responseJson = response.body;
         return responseJson;

@@ -5,14 +5,10 @@ class ValidateToken {
   dynamic handleSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String yourToken = prefs.getString('sessiontoken') ?? '';
-    if (yourToken == null) {
-      // handle empty token
-      prefs.setBool('savetoken', false);
-      print('empty token');
-    }
+    print('this is yourToken Response $yourToken');
     if (yourToken.isNotEmpty) {
-      print('this is yourToken Response $yourToken');
       bool hasExpired = JwtDecoder.isExpired(yourToken);
+      print('this is yourToken Response $yourToken');
       if (hasExpired) {
         // handle expired token
         prefs.setBool('savetoken', false);

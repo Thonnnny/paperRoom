@@ -1,10 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-
-import 'package:freshbuyer/orders/details_order.dart';
+import 'package:freshbuyer/components/loaderImage.dart';
+import 'package:freshbuyer/model/cartResponses.dart';
 import 'package:freshbuyer/size_config.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../cart/cart_screen.dart';
+import '../../components/app_text.dart';
 import '../../constants.dart';
+import '../../helpers/base_client.dart';
+import '../../helpers/res_apis.dart';
 import '../../model/productElement.dart';
+import '../tabbar/tabbar.dart';
 
 // ignore: must_be_immutable
 class ShopDetailScreen extends StatefulWidget {
@@ -25,6 +35,23 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   int index = 0;
   bool _iscollected = false;
 
+  Future<Cart> getCart() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('accesstoken');
+    var response = await BaseClient().get(RestApis.getCart,
+        {"Content-Type": "application/json", "accesstoken": token});
+    print('This is the response from the cart screen');
+    print(response);
+    var rsp = jsonDecode(response);
+    if (rsp['type'] == 'success') {
+      Cart cart = Cart.fromJson(rsp);
+      return cart;
+    } else {
+      print('No hay productos en el carrito');
+      return Cart();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,16 +71,19 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                         scale: 1,
                         color: color6,
                       ),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    const FRTabbarScreen()),
+                            (Route<dynamic> route) => false);
+                      },
                     ),
                     flexibleSpace: FlexibleSpaceBar(
                       background: Container(
-                        color: color4,
-                        child: Image.network(
-                          '${widget.product.mainImage}',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                          color: color4,
+                          child: ImageLoader(
+                              imageUrl: '${widget.product.mainImage}')),
                     ),
                   ),
                   SliverToBoxAdapter(
@@ -67,7 +97,13 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                           _buildLine(),
                           const SizedBox(height: 16),
                           ..._buildDescription(),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
+                          _buildLine(),
+                          const SizedBox(height: 16),
+                          ..._buildPrice(),
+                          const SizedBox(height: 16),
+                          _buildLine(),
+                          const SizedBox(height: 16),
                           _buildQuantity(),
                           const SizedBox(height: 115),
                         ],
@@ -76,7 +112,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                   ),
                 ],
               ),
-              _buldFloatBar()
+              _buldFloatBar(widget.product),
             ],
           ),
         ),
@@ -85,14 +121,21 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   }
 
   List<Widget> _buildTitle() {
+    var size = MediaQuery.of(context).size;
     return <Widget>[
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            '${widget.product.name}',
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 32, color: color2),
+          Container(
+            width: size.width * 0.75,
+            child: Center(
+              child: Text(
+                '${widget.product.name}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 32, color: color2),
+              ),
+            ),
           ),
           IconButton(
             onPressed: () => setState(() => _iscollected = !_iscollected),
@@ -124,7 +167,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
             'assets/icons/start@2x.png',
             height: 20,
             width: 20,
-            color: color1,
+            color: color6,
           ),
           const SizedBox(width: 8),
           const Text(
@@ -149,71 +192,88 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       const SizedBox(height: 8),
       Text(
         '${widget.product.description}',
-        style: const TextStyle(fontSize: 14, color: color2),
+        style: const TextStyle(
+            fontSize: 14,
+            color: color2,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Urbanist'),
       ),
-      // const ExpandableText(
-      //   productElement['description'],
-      //   style: TextStyle(fontSize: 14, color: color2),
-      //   linkColor: color5,
-      //   expandText: 'ver más',
-      //   collapseText: 'ver menos',
-      //   linkStyle: TextStyle(color: color5, fontWeight: FontWeight.bold),
-      // ),
+    ];
+  }
+
+  List<Widget> _buildPrice() {
+    return [
+      const Text('Precio por unidad',
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: color5)),
+      const SizedBox(height: 8),
+      Text(
+        '\$${widget.product.price.toString()}',
+        style: const TextStyle(
+            fontSize: 18, color: color2, fontWeight: FontWeight.bold),
+      ),
     ];
   }
 
   Widget _buildQuantity() {
-    return Row(
-      children: [
-        const Text('Cantidad',
-            style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 18, color: color5)),
-        const SizedBox(width: 20),
-        Container(
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(24)),
-            color: color4,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: Material(
-            color: Colors.transparent,
-            child: Row(
-              children: [
-                InkWell(
-                  child: Image.asset(
-                    'assets/icons/detail/minus@2x.png',
-                    scale: 2,
-                    color: color6,
+    return Padding(
+      padding: const EdgeInsets.only(left: 50, right: 50),
+      child: Row(
+        children: [
+          const Text('Cantidad',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 18, color: color5)),
+          const SizedBox(width: 20),
+          Container(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(24)),
+              color: color4,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Material(
+              color: Colors.transparent,
+              child: Row(
+                children: [
+                  InkWell(
+                    child: Image.asset(
+                      'assets/icons/detail/minus@2x.png',
+                      scale: 2,
+                      color: color6,
+                    ),
+                    onTap: () {
+                      if (_quantity <= 0) return;
+                      setState(() => _quantity -= 1);
+                    },
                   ),
-                  onTap: () {
-                    if (_quantity <= 0) return;
-                    setState(() => _quantity -= 1);
-                  },
-                ),
-                const SizedBox(width: 20),
-                Text('${widget.product.price.toString()}',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: color2)),
-                const SizedBox(width: 20),
-                InkWell(
-                  child: Image.asset(
-                    'assets/icons/detail/plus@2x.png',
-                    scale: 2,
-                    color: color6,
+                  const SizedBox(width: 20),
+                  Text('$_quantity',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: color3)),
+                  const SizedBox(width: 20),
+                  InkWell(
+                    child: Image.asset(
+                      'assets/icons/detail/plus@2x.png',
+                      scale: 2,
+                      color: color6,
+                    ),
+                    onTap: () => setState(() => _quantity += 1),
                   ),
-                  onTap: () => setState(() => _quantity += 1),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buldFloatBar() {
+  int getPrice() {
+    return widget.product.price * _quantity;
+  }
+
+  Widget _buldFloatBar(Product product) {
     buildAddCard() => Container(
           height: 58,
           width: getProportionateScreenWidth(258),
@@ -236,24 +296,19 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
               borderRadius: const BorderRadius.all(Radius.circular(29)),
               // splashColor: const Color(0xFFEEEEEE),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const OrderDetailScreen(),
-                  ),
-                );
+                addProductToCart(product);
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/icons/detail/bag@2x.png', scale: 2),
+                  Image.asset('assets/icons/detail/bag@2x.png', scale: 1.5),
                   const SizedBox(width: 16),
                   const Text(
-                    'Verifica tus datos',
+                    'Agregar producto',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: Colors.white,
+                      color: color2,
                     ),
                   ),
                 ],
@@ -278,15 +333,17 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Total price',
-                        style: TextStyle(color: color2, fontSize: 12)),
+                  children: [
+                    const Text('Precio Total',
+                        style: TextStyle(color: color2, fontSize: 15)),
                     SizedBox(height: 6),
-                    Text('\$280.00',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                            color: color6)),
+                    AppText(
+                      text: "\$${getPrice().toStringAsFixed(2)}",
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      textAlign: TextAlign.right,
+                      color: color6,
+                    ),
                   ],
                 ),
                 buildAddCard()
@@ -298,49 +355,44 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       ),
     );
   }
+
+  void addProductToCart(Product product) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('accesstoken');
+    Map data = {
+      'productId': product.id,
+      'quantity': _quantity,
+    };
+
+    print('This is your data: $data');
+    var response = await BaseClient().post(RestApis.apiAddProductToOrder, data,
+        {"Content-Type": "application/json", "accesstoken": token});
+    print(response);
+    var rsp = jsonDecode(response);
+    if (rsp['type'] == 'success') {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        title: 'Exito',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.green,
+        confirmBtnText: 'Aceptar',
+        onConfirmBtnTap: () {
+          Navigator.pop(context);
+        },
+      );
+    } else {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Error',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.red,
+        confirmBtnText: 'Aceptar',
+        onConfirmBtnTap: () {
+          Navigator.pop(context);
+        },
+      );
+    }
+  }
 }
-
-// class ExpandableText extends StatefulWidget {
-//   ExpandableText({this.text = ""});
-//   //text is the total text of our expandable widget
-//   final String text;
-//   @override
-//   _ExpandableTextState createState() => _ExpandableTextState();
-// }
-
-// class _ExpandableTextState extends State<ExpandableText> {
-//   static const viewMore = ' view more...';
-//   static const fixedLength = 50;
-//   late String textToDisplay;
-//   @override  
-//   void initState() {
-//     //if the text has more than a certain number of characters, the text we display will consist of that number of characters;
-//     //if it's not longer we display all the text
-//     print(widget.text.length);
-
-//     //we arbitrarily chose 25 as the length
-//     textToDisplay = widget.text.length > 25 ? widget.text.substring(0, 25) + viewMore : widget.text;
-//     super.initState();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return InkWell(
-//       child: Text(textToDisplay),
-//       onTap: () {
-//         //if the text is not expanded we show it all
-//         if (widget.text.length > 25 && textToDisplay.length <= (25 + viewMore.length)) {
-//           setState(() {
-//             textToDisplay = widget.text;
-//           });
-//         }
-//         //else if the text is already expanded we contract it back
-//         else if (widget.text.length > 25) {
-//           setState(() {
-//             textToDisplay = widget.text.substring(0, 25) + viewMore;
-//           });
-//         }
-//       },
-//     );
-//   }
-// }

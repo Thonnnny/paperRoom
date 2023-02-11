@@ -2,13 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:freshbuyer/components/splash_screen.dart';
+import 'package:freshbuyer/screens/auth/welcome.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants.dart';
 
+import '../../helpers/base_client.dart';
+import '../../helpers/res_apis.dart';
 import '../../providers/login_provider.dart';
-import '../auth/login.dart';
 import '../profile/profile_screen.dart';
 
 class HomeAppBar extends StatefulWidget {
@@ -35,48 +40,41 @@ class _HomeAppBarState extends State<HomeAppBar> {
     });
   }
 
-  // void logOut() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   final String? token = prefs.getString('sessiontoken');
-  //   var data = {};
-  //   var response = await BaseClient().post(RestApis.apiLogOut, data,
-  //       {"Content-Type": "application/json", "sessiontoken": token});
-  //   var rsp = jsonDecode(response);
-  //   print(rsp);
-  //   Navigator.pushNamed(context, LoginScreen.route());
-  // }
-
-  void logOut() {
+  void logOut() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('sessiontoken');
     final loginProvider =
+        // ignore: use_build_context_synchronously
         Provider.of<LoginFormProvider>(context, listen: false);
-    loginProvider.logOut();
-    Navigator.pushNamed(context, LoginScreen.route());
+    var response = await BaseClient().get(RestApis.getLogOut,
+        {"Content-Type": "application/json", "sessiontoken": token});
+    var rsp = jsonDecode(response);
+    print(rsp);
+    if (rsp['type'] == "success") {
+      print('logout successful');
+      loginProvider.logOut();
+      // ignore: use_build_context_synchronously
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  const SafeArea(child: WelcomeScreen())),
+          (Route<dynamic> route) => false);
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        title: 'Cerrando sesión',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.green,
+        confirmBtnText: 'Continuar',
+      );
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  const SafeArea(child: SplashScreen())),
+          (Route<dynamic> route) => false);
+    }
   }
-
-  // void logOut() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   final String? token = prefs.getString('sessiontoken');
-  //   var url = Uri.parse('https://thepaperoom.com/api/logout');
-  //   try {
-  //     final response = await http.post(
-  //       url,
-  //       headers: {
-  //         HttpHeaders.contentTypeHeader: 'application/json',
-  //         "sessiontoken": "$token"
-  //       },
-  //     );
-  //     print(response.body);
-  //     final rsp = jsonDecode(response.body);
-  //     print(rsp);
-  //     if (rsp['type'] == "success") {
-  //       print('logout successful');
-  //     } else {
-  //       // handle error
-  //     }
-  //   } catch (e) {
-  //     // handle exception
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +114,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        baseName ?? ' Nombre',
+                        baseName ?? 'Cliente',
                         style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

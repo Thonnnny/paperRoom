@@ -6,6 +6,9 @@ import 'dart:convert';
 
 import 'package:freshbuyer/model/customerResponse.dart';
 import 'package:freshbuyer/model/productCartResponse.dart';
+import 'package:freshbuyer/model/statusHistoryResponse.dart';
+
+import 'currencyResponse.dart';
 
 class Cart {
   Cart({
@@ -160,111 +163,5 @@ class CartClass {
         "items": items == null
             ? []
             : List<dynamic>.from(items!.map((x) => x.toJson())),
-      };
-}
-
-class Currency {
-  Currency({
-    this.id,
-    this.code,
-    this.name,
-    this.symbol,
-    this.createdAt,
-    this.v,
-  });
-
-  String? id;
-  String? code;
-  String? name;
-  String? symbol;
-  DateTime? createdAt;
-  int? v;
-
-  Currency copyWith({
-    String? id,
-    String? code,
-    String? name,
-    String? symbol,
-    DateTime? createdAt,
-    int? v,
-  }) =>
-      Currency(
-        id: id ?? this.id,
-        code: code ?? this.code,
-        name: name ?? this.name,
-        symbol: symbol ?? this.symbol,
-        createdAt: createdAt ?? this.createdAt,
-        v: v ?? this.v,
-      );
-
-  factory Currency.fromRawJson(String str) =>
-      Currency.fromJson(json.decode(str));
-
-  String toRawJson() => json.encode(toJson());
-
-  factory Currency.fromJson(Map<String, dynamic> json) => Currency(
-        id: json["_id"],
-        code: json["code"],
-        name: json["name"],
-        symbol: json["symbol"],
-        createdAt: json["createdAt"] == null
-            ? null
-            : DateTime.parse(json["createdAt"]),
-        v: json["__v"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "_id": id,
-        "code": code,
-        "name": name,
-        "symbol": symbol,
-        "createdAt": createdAt?.toIso8601String(),
-        "__v": v,
-      };
-}
-
-class StatusHistory {
-  StatusHistory({
-    this.status,
-    this.date,
-    this.stateChangedBy,
-    this.id,
-  });
-
-  String? status;
-  DateTime? date;
-  String? stateChangedBy;
-  String? id;
-
-  StatusHistory copyWith({
-    String? status,
-    DateTime? date,
-    String? stateChangedBy,
-    String? id,
-  }) =>
-      StatusHistory(
-        status: status ?? this.status,
-        date: date ?? this.date,
-        stateChangedBy: stateChangedBy ?? this.stateChangedBy,
-        id: id ?? this.id,
-      );
-
-  factory StatusHistory.fromRawJson(String str) =>
-      StatusHistory.fromJson(json.decode(str));
-
-  String toRawJson() => json.encode(toJson());
-
-  factory StatusHistory.fromJson(Map<String, dynamic> json) => StatusHistory(
-        status: json["status"],
-        date: json["date"] == null ? null : DateTime.parse(json["date"]),
-        stateChangedBy: json["stateChangedBy"],
-        id: json["_id"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "status": status,
-        "date": date?.toIso8601String(),
-        "stateChangedBy": stateChangedBy,
-        "_id": id,
       };
 }

@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/components/special_offer_widget.dart';
 import 'package:freshbuyer/constants.dart';
-import 'package:freshbuyer/model/oldCategory.dart';
-import 'package:freshbuyer/model/special_offer.dart';
-import 'package:freshbuyer/screens/mostpopular/most_popular_screen.dart';
+import 'package:freshbuyer/model/productsInOffer.dart';
+
+import '../../class/classProductsInOffer.dart';
+import '../../model/oldCategory.dart';
 
 typedef SpecialOffersOnTapSeeAll = void Function();
 
@@ -17,36 +19,59 @@ class SpecialOffers extends StatefulWidget {
 
 class _SpecialOffersState extends State<SpecialOffers> {
   late final List<Category> categories = homeCategries;
-  late final List<SpecialOffer> specials = homeSpecialOffers;
+  late Future<List<Offer>> _products;
+  ProductsOfferRepository offer = ProductsOfferRepository();
+  @override
+  void initState() {
+    super.initState();
+    _products = offer.getProductsInOffer();
+  }
 
+  int items = 0;
   int selectIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Column(
       children: [
         _buildTitle(),
+        _buildLine(),
         const SizedBox(height: 24),
         Stack(children: [
           Container(
-            height: 181,
+            height: size.height * 0.45,
             decoration: const BoxDecoration(
-              color: color5,
+              color: color3,
               borderRadius: BorderRadius.all(Radius.circular(32)),
             ),
-            child: PageView.builder(
-              itemBuilder: (context, index) {
-                final data = specials[index];
-                return SpecialOfferWidget(context, data: data, index: index);
-              },
-              itemCount: specials.length,
-              allowImplicitScrolling: true,
-              onPageChanged: (value) {
-                setState(() => selectIndex = value);
+            child: FutureBuilder<List<Offer>>(
+              future: _products,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  items = snapshot.data!.length;
+                  return PageView.builder(
+                    itemBuilder: (context, index) {
+                      final data = snapshot.data![index];
+                      return SpecialOfferWidget(context,
+                          data: data, index: index);
+                    },
+                    itemCount: snapshot.data!.length,
+                    allowImplicitScrolling: true,
+                    onPageChanged: (value) {
+                      setState(() {
+                        selectIndex = value;
+                      });
+                    },
+                  );
+                } else if (snapshot.hasError) {
+                  return Text("${snapshot.error}");
+                }
+                return const Center(child: CircularProgressIndicator());
               },
             ),
           ),
-          _buildPageIndicator()
+          buildPageIndicator(items),
         ]),
         const SizedBox(height: 24),
         GridView.builder(
@@ -57,19 +82,19 @@ class _SpecialOffersState extends State<SpecialOffers> {
           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
             mainAxisExtent: 100,
             mainAxisSpacing: 24,
-            crossAxisSpacing: 24,
-            maxCrossAxisExtent: 77,
+            crossAxisSpacing: 10,
+            maxCrossAxisExtent: 100,
           ),
           itemBuilder: ((context, index) {
             final data = categories[index];
             return GestureDetector(
-              onTap: () =>
-                  Navigator.pushNamed(context, MostPopularScreen.route()),
+              onTap: () {},
+              // Navigator.pushNamed(context, MostPopularScreen.route()),
               child: Column(
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: color5,
+                      color: color2,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Padding(
@@ -78,7 +103,8 @@ class _SpecialOffersState extends State<SpecialOffers> {
                         data.icon,
                         width: 35,
                         height: 35,
-                        color: color3,
+                        color: color5,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
@@ -87,7 +113,7 @@ class _SpecialOffersState extends State<SpecialOffers> {
                     child: Text(
                       data.title,
                       style: const TextStyle(
-                          color: color2,
+                          color: color3,
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                     ),
@@ -101,35 +127,18 @@ class _SpecialOffersState extends State<SpecialOffers> {
     );
   }
 
-  Widget _buildTitle() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Text(
-          'Ofertas especiales',
-          style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 20, color: color2),
-        ),
-        TextButton(
-          onPressed: () => widget.onTapSeeAll?.call(),
-          child: const Text(
-            'Ver Todo',
-            style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 16, color: color6),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPageIndicator() {
+  Widget buildPageIndicator(int items) {
+    var size = MediaQuery.of(context).size;
     List<Widget> list = [];
-    for (int i = 0; i < specials.length; i++) {
-      list.add(i == selectIndex ? _indicator(true) : _indicator(false));
+    for (int i = 0; i < items; i++) {
+      list.add(i == selectIndex ? indicator(true) : indicator(false));
+    }
+    if (items == 0) {
+      list.add(indicator(true));
+      const CircularProgressIndicator();
     }
     return Container(
-      height: 181,
+      height: size.height * 0.45,
       alignment: Alignment.bottomCenter,
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -139,7 +148,7 @@ class _SpecialOffersState extends State<SpecialOffers> {
     );
   }
 
-  Widget _indicator(bool isActive) {
+  Widget indicator(bool isActive) {
     return SizedBox(
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -151,6 +160,39 @@ class _SpecialOffersState extends State<SpecialOffers> {
           color: isActive ? color6 : color2,
         ),
       ),
+    );
+  }
+
+  Widget _buildLine() {
+    return Container(
+      height: 2,
+      width: 40,
+      decoration: const BoxDecoration(
+        color: color3,
+        borderRadius: BorderRadius.all(Radius.circular(2)),
+      ),
+    );
+  }
+
+  Widget _buildTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Text(
+          'Ofertas especiales',
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 20, color: color3),
+        ),
+        TextButton(
+          onPressed: () => widget.onTapSeeAll?.call(),
+          child: const Text(
+            'Ver Todo',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: color6),
+          ),
+        ),
+      ],
     );
   }
 }

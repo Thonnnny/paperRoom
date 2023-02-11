@@ -7,8 +7,6 @@ class RegisterFormProvider extends ChangeNotifier {
   String email = '';
   String password = '';
   String reconfirmPassword = '';
-  String fullName = '';
-  String phone = '';
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -21,7 +19,7 @@ class RegisterFormProvider extends ChangeNotifier {
   bool isValidForm() {
     print(formKey.currentState?.validate());
 
-    print('$email - $password - $reconfirmPassword - $fullName - $phone');
+    print('$email - $password - $reconfirmPassword ');
 
     return formKey.currentState?.validate() ?? false;
   }

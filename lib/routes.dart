@@ -13,7 +13,9 @@ final Map<String, WidgetBuilder> routes = {
   RegisterScreen.route(): (context) => const RegisterScreen(),
   WalletScreen.route(): (context) => const WalletScreen(),
   // MostPopularScreen.route(): (context) => const MostPopularScreen(),
-  SpecialOfferScreen.route(): (context) => const SpecialOfferScreen(),
+  SpecialOfferScreen.route(): (context) => const SpecialOfferScreen(
+        datas: [],
+      ),
   // ignore: prefer_const_constructors
 
   ProfileScreen.route(): (context) => const ProfileScreen(),

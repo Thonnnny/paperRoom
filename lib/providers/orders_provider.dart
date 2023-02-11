@@ -7,6 +7,7 @@ class OrderFormProvider extends ChangeNotifier {
   String nombreCliente = '';
   String fechaEntrega = '';
   String telefono = '';
+  String direccion = '';
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -19,7 +20,7 @@ class OrderFormProvider extends ChangeNotifier {
   bool isValidForm() {
     print(formKey.currentState?.validate());
 
-    print('$dni - $nombreCliente - $fechaEntrega - $telefono');
+    print('$dni - $nombreCliente - $fechaEntrega - $telefono - $direccion');
 
     return formKey.currentState?.validate() ?? false;
   }
