@@ -5,6 +5,7 @@ class RegisterFormProvider extends ChangeNotifier {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   String email = '';
+  String fullName = '';
   String password = '';
   String reconfirmPassword = '';
 
@@ -19,7 +20,7 @@ class RegisterFormProvider extends ChangeNotifier {
   bool isValidForm() {
     print(formKey.currentState?.validate());
 
-    print('$email - $password - $reconfirmPassword ');
+    print('$email - $password - $reconfirmPassword - $fullName ');
 
     return formKey.currentState?.validate() ?? false;
   }

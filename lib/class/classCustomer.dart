@@ -18,7 +18,11 @@ class CustomerCar {
     var rsp = jsonDecode(response);
     if (rsp['type'] == 'success') {
       Cart cart = Cart.fromJson(rsp);
-      return cart.cart!.customer!;
+      if (cart.cart?.customer?.fullname == null) {
+        return Customer();
+      } else {
+        return cart.cart!.customer!;
+      }
     } else {
       print('No hay productos en el carrito');
       return Customer();

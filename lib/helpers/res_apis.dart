@@ -9,6 +9,11 @@ class RestApis {
       'https://thepaperoom.com/api/products/'; //+id
   static String getProductInOffer =
       'https://thepaperoom.com/api/products/offers';
+  static String getCountry = 'https://thepaperoom.com/api/getCountries';
+  static String getSubdivision =
+      'https://thepaperoom.com/api/getSubdivisionsByCountry/'; //+idCountry
+  static String getCities =
+      'https://thepaperoom.com/api/getCitiesBySubdivision/';
 
   //////////////////POST/////////////////////
   static String apiLogin = 'https://thepaperoom.com/api/login';
@@ -17,4 +22,5 @@ class RestApis {
       'https://thepaperoom.com/api/addProductToOrder';
   static String apiRemoveProductFromOrder =
       'https://thepaperoom.com/api/removeProductFromOrder';
+  static String apiCreateOrder = 'https://thepaperoom.com/api/confirmOrder';
 }

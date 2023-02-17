@@ -1,4 +1,5 @@
-import 'package:date_format/date_format.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/class/classCart.dart';
 import 'package:freshbuyer/class/classCustomer.dart';
@@ -7,16 +8,23 @@ import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/model/cartResponses.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../class/classAdress.dart';
 import '../class/classOnlyDetailsCart.dart';
 import '../components/app_button.dart';
 import '../components/app_text.dart';
 
 import '../components/splashorders_Screen.dart';
+import '../helpers/base_client.dart';
+import '../helpers/res_apis.dart';
 import '../model/customerResponse.dart';
 import '../model/productCartResponse.dart';
 import '../providers/orders_provider.dart';
 import '../screens/tabbar/tabbar.dart';
+import '../screens/test/waitingOrders.dart';
 import '../size_config.dart';
 
 class CartScreen extends StatefulWidget {
@@ -34,15 +42,28 @@ class _CartScreenState extends State<CartScreen> {
   int amount = 1;
 
   late Future<List<dynamic>> _products;
+
   late Future<Customer> _customer;
   late Future<CartClass> _cart;
+
   CustomerCar customerClass = CustomerCar();
   ProductsCar apisClass = ProductsCar();
+  AddressInfo addressClass = AddressInfo();
   CartOnlyObjectCar cartClass = CartOnlyObjectCar();
 
+  String _countrySelected = '';
+  String _citySelected = '';
+  String _subdivisionSelected = '';
+
+  List<dynamic> countryList = [];
+  List<dynamic> subdivisionList = [];
+  List<dynamic> cityList = [];
+  List<String> filteredCities = [];
+
+  late final List<String> _paymentMethods = ['cash', 'transfer'];
+  late String _paymentSelected = 'cash';
+
   TextEditingController notaAdicional = TextEditingController();
-  TextEditingController telefono = TextEditingController();
-  TextEditingController direccion = TextEditingController();
 
   @override
   void initState() {
@@ -50,9 +71,111 @@ class _CartScreenState extends State<CartScreen> {
     _customer = customerClass.getCustomerCart();
     _products = apisClass.getCartProducts();
     _cart = cartClass.getOnlyObjectCart();
+    _loadCountries();
     notaAdicional = TextEditingController();
-    telefono = TextEditingController();
-    direccion = TextEditingController();
+
+    _cart.then((value) {
+      if (value.items!.isEmpty) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const WaitingOrder()),
+            (route) => false);
+      }
+    });
+  }
+
+  void createOrder(String reference, String city, String subdivision,
+      String country, String paymentMethod) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('accesstoken');
+    Map data = {
+      'reference': reference,
+      'city': city,
+      'subdivision': subdivision,
+      'country': country,
+      'paymentMethod': paymentMethod,
+    };
+    print('This is your data to create order $data');
+    var response = await BaseClient().post(RestApis.apiCreateOrder, data,
+        {"Content-Type": "application/json", "accesstoken": token});
+    var rsp = jsonDecode(response);
+    print('This is your confirm Order response *****$rsp');
+    if (rsp['type'] == 'success') {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        title: '${rsp['title']}',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.green,
+        confirmBtnText: 'Continuar',
+        onConfirmBtnTap: () {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      const SafeArea(child: FRTabbarScreen())),
+              (Route<dynamic> route) => false);
+        },
+      );
+    } else {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Oops...',
+        text: '${rsp['message']}',
+        confirmBtnColor: Colors.red,
+        confirmBtnText: 'Reintentar',
+      );
+    }
+  }
+
+  Future<List<dynamic>> _loadCountries() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('accesstoken');
+    var response = await BaseClient().get(RestApis.getCountry,
+        {"Content-Type": "application/json", "accesstoken": token});
+    var rsp = jsonDecode(response);
+    if (rsp['type'] == 'success') {
+      setState(() {
+        countryList = rsp['countries'];
+        print('This is the country list $countryList');
+      });
+      return countryList;
+    }
+    return countryList;
+  }
+
+  Future<List<dynamic>> _loadSubdivision() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('accesstoken');
+    var response = await BaseClient().get(
+        RestApis.getSubdivision + _countrySelected,
+        {"Content-Type": "application/json", "accesstoken": token});
+    var rsp = jsonDecode(response);
+    if (rsp['type'] == 'success') {
+      setState(() {
+        subdivisionList = rsp['subdivisions'];
+        print('This is the subdivision list $subdivisionList');
+      });
+      return subdivisionList;
+    }
+    return subdivisionList;
+  }
+
+  Future<List<dynamic>> _loadCities() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('accesstoken');
+    var response = await BaseClient().get(
+        RestApis.getCities + _subdivisionSelected,
+        {"Content-Type": "application/json", "accesstoken": token});
+    var rsp = jsonDecode(response);
+    if (rsp['type'] == 'success') {
+      setState(() {
+        cityList = rsp['cities'];
+        print('This is the city list $cityList');
+      });
+      return cityList;
+    }
+    return cityList;
   }
 
   @override
@@ -103,14 +226,14 @@ class _CartScreenState extends State<CartScreen> {
                           const SizedBox(height: 16),
                           _buildLine(),
                           const SizedBox(height: 16),
-                          ..._buildPhone(),
+                          ..._buildPayment(),
                           const SizedBox(height: 8),
-                          _crearTelefono(),
+                          _crearMetodoDePago(),
                           const SizedBox(height: 16),
                           _buildLine(),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 16),
                           ..._buildDirection(),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 16),
                           _crearDireccion(),
                           const SizedBox(height: 16),
                           _buildLine(),
@@ -140,30 +263,325 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _crearTelefono() {
-    final ordersForm = Provider.of<OrderFormProvider>(context);
+  Widget _crearDireccion() {
+    var size = MediaQuery.of(context).size;
+    if (countryList.length == 1) {
+      print('This is the countryListValue$countryList');
+      return Container(
+        width: size.width * 0.9,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              child: DropdownButtonFormField(
+                icon: const Icon(Icons.arrow_drop_down, color: color5),
+                iconSize: 24,
+                dropdownColor: color5,
+                elevation: 16,
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: color5, width: 1.0),
+                      borderRadius: BorderRadius.circular(20)),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: color5, width: 1.0),
+                      borderRadius: BorderRadius.circular(20)),
+                  hintText: 'Selecciona un País:',
+                  hintStyle: const TextStyle(
+                      color: color2,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Urbanist'),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                ),
+                items: countryList.map((country) {
+                  return DropdownMenuItem(
+                    value: country['_id'],
+                    child: Text(country['name'],
+                        style: const TextStyle(
+                            color: color2,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _countrySelected = value.toString();
+                    _subdivisionSelected = '';
+                    _citySelected = '';
+                    subdivisionList = [];
+                    cityList = [];
+                  });
+                  _loadSubdivision().then((value) {
+                    setState(() {
+                      subdivisionList = value;
+                    });
+                  });
+                },
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Container(
+              width: size.width * 0.9,
+              child: DropdownButtonFormField(
+                icon: const Icon(Icons.arrow_drop_down, color: color5),
+                iconSize: 24,
+                dropdownColor: color5,
+                elevation: 16,
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: color5, width: 1.0),
+                      borderRadius: BorderRadius.circular(20)),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: color5, width: 1.0),
+                      borderRadius: BorderRadius.circular(20)),
+                  hintText: 'Selecciona un Departamento:',
+                  hintStyle: const TextStyle(
+                      color: color2,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Urbanist'),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                ),
+                items: subdivisionList.map((subdivision) {
+                  return DropdownMenuItem(
+                    value: subdivision['_id'],
+                    child: Text(subdivision['name'],
+                        style: const TextStyle(
+                            color: color2,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _subdivisionSelected = value.toString();
+                    _citySelected = '';
+                    cityList = [];
+                    _loadCities().then((value) {
+                      setState(() {
+                        cityList = value;
+                        print('This is the new elements of cityList$cityList');
+                      });
+                    });
+                  });
+                },
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Container(
+              width: size.width * 0.9,
+              child: DropdownButtonFormField(
+                icon: const Icon(Icons.arrow_drop_down, color: color5),
+                iconSize: 24,
+                dropdownColor: color5,
+                elevation: 16,
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: color5, width: 1.0),
+                      borderRadius: BorderRadius.circular(20)),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: color5, width: 1.0),
+                      borderRadius: BorderRadius.circular(20)),
+                  hintText: 'Selecciona una Ciudad:',
+                  hintStyle: const TextStyle(
+                      color: color2,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Urbanist'),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                ),
+                value: _citySelected == '' ? null : _citySelected,
+                items: cityList.map((city) {
+                  return DropdownMenuItem(
+                    value: city['_id'],
+                    child: Text(city['name'],
+                        style: const TextStyle(
+                            color: color2,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _citySelected = value.toString();
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Container(
-      child: TextFormField(
-        autocorrect: false,
-        keyboardType: TextInputType.phone,
-        onChanged: (value) => ordersForm.telefono = value,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor ingrese su telefono';
-          }
-          if (value.length > 8) {
-            return 'Por favor ingrese un telefono valido';
-          } else {
-            return 'se necesita un telefono valido';
-          }
-        },
-        style: const TextStyle(
-            color: color2,
-            fontSize: 18,
-            fontFamily: 'Urbanist',
-            fontWeight: FontWeight.bold),
-        controller: telefono,
-        //cursorColor: firstColor,
+      width: size.width * 0.9,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            child: DropdownButtonFormField(
+              icon: const Icon(Icons.arrow_drop_down, color: color5),
+              iconSize: 24,
+              dropdownColor: color5,
+              elevation: 16,
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: color5, width: 1.0),
+                    borderRadius: BorderRadius.circular(20)),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: color5, width: 1.0),
+                    borderRadius: BorderRadius.circular(20)),
+                hintText: 'País',
+                hintStyle: const TextStyle(
+                    color: color2,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Urbanist'),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              ),
+              items: countryList.map((country) {
+                return DropdownMenuItem(
+                  value: country['_id'],
+                  child: Text(country['name'],
+                      style: const TextStyle(
+                          color: color2,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16)),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _countrySelected = value.toString();
+                  _subdivisionSelected = '';
+                  _citySelected = '';
+                  subdivisionList = [];
+                  cityList = [];
+                });
+                _loadSubdivision().then((value) {
+                  setState(() {
+                    subdivisionList = value;
+                    _subdivisionSelected = '';
+                    cityList = [];
+                    _subdivisionSelected = '';
+                    _citySelected = '';
+                  });
+                });
+              },
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Container(
+            width: size.width * 0.9,
+            child: DropdownButtonFormField(
+              icon: const Icon(Icons.arrow_drop_down, color: color5),
+              iconSize: 24,
+              dropdownColor: color5,
+              elevation: 16,
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: color5, width: 1.0),
+                    borderRadius: BorderRadius.circular(20)),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: color5, width: 1.0),
+                    borderRadius: BorderRadius.circular(20)),
+                hintText: 'Subdivisión',
+                hintStyle: const TextStyle(
+                    color: color2,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Urbanist'),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              ),
+              items: subdivisionList.map((subdivision) {
+                return DropdownMenuItem(
+                  value: subdivision['_id'],
+                  child: Text(subdivision['name'],
+                      style: const TextStyle(
+                          color: color2,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16)),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _subdivisionSelected = value.toString();
+                  _citySelected = '';
+                  cityList = [];
+                  _loadCities().then((value) {
+                    setState(() {
+                      cityList = value;
+                      print('This is the new elements of cityList$cityList');
+                    });
+                  });
+                });
+              },
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Container(
+            width: size.width * 0.9,
+            child: DropdownButtonFormField(
+              icon: const Icon(Icons.arrow_drop_down, color: color5),
+              iconSize: 24,
+              dropdownColor: color5,
+              elevation: 16,
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: color5, width: 1.0),
+                    borderRadius: BorderRadius.circular(20)),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: color5, width: 1.0),
+                    borderRadius: BorderRadius.circular(20)),
+                hintText: 'Ciudad',
+                hintStyle: const TextStyle(
+                    color: color2,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Urbanist'),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              ),
+              items: cityList.map((city) {
+                return DropdownMenuItem(
+                  value: city['_id'],
+                  child: Text(city['name'],
+                      style: const TextStyle(
+                          color: color2,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16)),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _citySelected = value.toString();
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _crearMetodoDePago() {
+    return Container(
+      child: DropdownButtonFormField(
+        icon: const Icon(Icons.arrow_drop_down, color: color5),
+        iconSize: 24,
+        dropdownColor: color5,
+        elevation: 16,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: color5, width: 1.0),
@@ -171,25 +589,83 @@ class _CartScreenState extends State<CartScreen> {
           focusedBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: color5, width: 1.0),
               borderRadius: BorderRadius.circular(20)),
-          prefixIcon: const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Icon(
-              Icons.phone,
-              color: color5,
-              size: 30,
-            ),
-          ),
-          hintText: "Teléfono",
-          hintStyle: const TextStyle(
-              color: color2,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Urbanist'),
-          border: InputBorder.none,
+          border: OutlineInputBorder(
+              borderSide: const BorderSide(color: color5, width: 1.0),
+              borderRadius: BorderRadius.circular(20)),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         ),
+        value: _paymentSelected,
+        items: _paymentMethods.map((value) {
+          return DropdownMenuItem(
+            value: value,
+            child: Text(value,
+                style: const TextStyle(
+                    color: color2,
+                    fontSize: 15,
+                    fontFamily: 'Urbanist',
+                    fontWeight: FontWeight.bold)),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _paymentSelected = value.toString();
+          });
+        },
       ),
     );
   }
+
+  // Widget _crearTelefono() {
+  //   final ordersForm = Provider.of<OrderFormProvider>(context);
+  //   return Container(
+  //     child: TextFormField(
+  //       autocorrect: false,
+  //       keyboardType: TextInputType.phone,
+  //       onChanged: (value) => ordersForm.telefono = value,
+  //       validator: (value) {
+  //         if (value == null || value.isEmpty) {
+  //           return 'Por favor ingrese su telefono';
+  //         }
+  //         if (value.length > 8) {
+  //           return 'Por favor ingrese un telefono valido';
+  //         } else {
+  //           return 'se necesita un telefono valido';
+  //         }
+  //       },
+  //       style: const TextStyle(
+  //           color: color2,
+  //           fontSize: 18,
+  //           fontFamily: 'Urbanist',
+  //           fontWeight: FontWeight.bold),
+  //       controller: telefono,
+  //       //cursorColor: firstColor,
+  //       decoration: InputDecoration(
+  //         enabledBorder: OutlineInputBorder(
+  //             borderSide: const BorderSide(color: color5, width: 1.0),
+  //             borderRadius: BorderRadius.circular(20)),
+  //         focusedBorder: OutlineInputBorder(
+  //             borderSide: const BorderSide(color: color5, width: 1.0),
+  //             borderRadius: BorderRadius.circular(20)),
+  //         prefixIcon: const Padding(
+  //           padding: EdgeInsets.all(8.0),
+  //           child: Icon(
+  //             Icons.phone,
+  //             color: color5,
+  //             size: 30,
+  //           ),
+  //         ),
+  //         hintText: "Teléfono",
+  //         hintStyle: const TextStyle(
+  //             color: color2,
+  //             fontSize: 15,
+  //             fontWeight: FontWeight.bold,
+  //             fontFamily: 'Urbanist'),
+  //         border: InputBorder.none,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   List<Widget> _buildDirection() {
     return [
@@ -209,51 +685,6 @@ class _CartScreenState extends State<CartScreen> {
     ];
   }
 
-  Widget _crearDireccion() {
-    final ordersForm = Provider.of<OrderFormProvider>(context);
-    return Container(
-      child: TextFormField(
-        autocorrect: false,
-        keyboardType: TextInputType.text,
-        onChanged: (value) => ordersForm.direccion = value,
-        validator: (value) => value == null || value.isEmpty
-            ? 'El campo no puede estar vacio'
-            : null,
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Urbanist',
-        ),
-        controller: direccion,
-        //cursorColor: firstColor,
-        decoration: InputDecoration(
-          enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: color5, width: 1.0),
-              borderRadius: BorderRadius.circular(20)),
-          focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: color5, width: 1.0),
-              borderRadius: BorderRadius.circular(20)),
-          prefixIcon: const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Icon(
-              Icons.location_on,
-              color: color5,
-              size: 30,
-            ),
-          ),
-          hintText: "Dirección",
-          hintStyle: const TextStyle(
-              color: color2,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Urbanist'),
-          border: InputBorder.none,
-        ),
-      ),
-    );
-  }
-
   Widget _crearNotaAdicional() {
     final ordersForm = Provider.of<OrderFormProvider>(context);
     return Container(
@@ -265,8 +696,8 @@ class _CartScreenState extends State<CartScreen> {
             ? 'El campo no puede estar vacio'
             : null,
         style: const TextStyle(
-          color: Colors.black,
-          fontSize: 18,
+          color: Colors.white,
+          fontSize: 15,
           fontWeight: FontWeight.bold,
           fontFamily: 'Urbanist',
         ),
@@ -322,14 +753,8 @@ class _CartScreenState extends State<CartScreen> {
               borderRadius: const BorderRadius.all(Radius.circular(29)),
               // splashColor: const Color(0xFFEEEEEE),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CartScreen(
-                      product: [],
-                    ),
-                  ),
-                );
+                createOrder(notaAdicional.text, _citySelected,
+                    _subdivisionSelected, _countrySelected, _paymentSelected);
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -464,14 +889,14 @@ class _CartScreenState extends State<CartScreen> {
     ];
   }
 
-  List<Widget> _buildPhone() {
+  List<Widget> _buildPayment() {
     return [
-      const Text('Número de teléfono',
+      const Text('Agrega un método de pago:',
           style: TextStyle(
               fontSize: 18, fontWeight: FontWeight.bold, color: color5)),
       const SizedBox(height: 8),
       const Text(
-        'Agrega un teléfono para contactarte:',
+        'selecciona tu forma de pago:',
         // '${widget.product.description}',
         style: TextStyle(
             fontSize: 14,
@@ -536,7 +961,7 @@ class _CartScreenState extends State<CartScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Nombre de Usuario',
+                      const Text('Nombre de Usuario:',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -635,20 +1060,6 @@ class _CartScreenState extends State<CartScreen> {
       ),
     );
   }
-
-  // Widget getButtonPriceWidget() {
-  //   return Container(
-  //     padding: const EdgeInsets.all(2),
-  //     decoration: BoxDecoration(
-  //       color: const Color(0xff489E67),
-  //       borderRadius: BorderRadius.circular(4),
-  //     ),
-  //     child: Text(
-  //       widget.totalPrice.toString(),
-  //       style: const TextStyle(fontWeight: FontWeight.w600),
-  //     ),
-  //   );
-  // }
 
   void showBottomSheet(context) {
     showModalBottomSheet(

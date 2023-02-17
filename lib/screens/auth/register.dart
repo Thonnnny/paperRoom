@@ -33,7 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
   TextEditingController reconfirmPassword = TextEditingController();
-  // TextEditingController fullName = TextEditingController();
+  TextEditingController fullName = TextEditingController();
   // TextEditingController phone = TextEditingController();
   bool? _passwordVisible;
   bool? _reconfirmPasswordVisible;
@@ -44,19 +44,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
     email = TextEditingController();
     password = TextEditingController();
     reconfirmPassword = TextEditingController();
-    // fullName = TextEditingController();
+    fullName = TextEditingController();
     // phone = TextEditingController();
     _passwordVisible = true;
     _reconfirmPasswordVisible = true;
   }
 
-  void register(String email, String password, String reconfirmPassword) async {
+  void register(String email, String fullname, String password,
+      String reconfirmPassword) async {
     Map data = {
       'email': email,
+      'fullname': fullname,
       'password': password,
       'repassword': reconfirmPassword,
     };
-    if (email.isEmpty || password.isEmpty || reconfirmPassword.isEmpty) {
+    if (email.isEmpty ||
+        fullname.isEmpty ||
+        password.isEmpty ||
+        reconfirmPassword.isEmpty) {
       QuickAlert.show(
         context: context,
         type: QuickAlertType.error,
@@ -178,8 +183,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         _crearUsuario(),
         SizedBox(height: size.height * 0.01),
-        // _crearFullname(),
-        // SizedBox(height: size.height * 0.01),
+        _crearFullname(),
+        SizedBox(height: size.height * 0.01),
         // _crearTelefono(),
         // SizedBox(height: size.height * 0.01),
         _crearPassword(),
@@ -214,7 +219,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           onPressed: () {
             // login(email.text, password.text);
-            register(email.text, password.text, reconfirmPassword.text);
+            register(email.text, fullName.text, password.text,
+                reconfirmPassword.text);
             FocusScope.of(context).unfocus();
           },
           child: const Text('REGISTRARME',
@@ -499,49 +505,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
   //   );
   // }
 
-  // Widget _crearFullname() {
-  //   final registerForm = Provider.of<RegisterFormProvider>(context);
-  //   return Container(
-  //     margin: const EdgeInsets.only(left: 20, right: 20),
-  //     child: TextFormField(
-  //       autocorrect: false,
-  //       keyboardType: TextInputType.text,
-  //       onChanged: (value) => registerForm.fullName = value,
-  //       validator: (value) => value == null || value.isEmpty
-  //           ? 'El campo no puede estar vacio'
-  //           : null,
-  //       style: const TextStyle(
-  //         color: Colors.black,
-  //         fontSize: 18,
-  //         fontWeight: FontWeight.bold,
-  //         fontFamily: 'Urbanist',
-  //       ),
-  //       controller: fullName,
-  //       //cursorColor: firstColor,
-  //       decoration: InputDecoration(
-  //         enabledBorder: OutlineInputBorder(
-  //             borderSide: const BorderSide(color: color6, width: 3.0),
-  //             borderRadius: BorderRadius.circular(20)),
-  //         focusedBorder: OutlineInputBorder(
-  //             borderSide: const BorderSide(color: Colors.white, width: 3.0),
-  //             borderRadius: BorderRadius.circular(20)),
-  //         prefixIcon: const Padding(
-  //           padding: EdgeInsets.all(8.0),
-  //           child: Icon(
-  //             Icons.person,
-  //             color: color6,
-  //             size: 30,
-  //           ),
-  //         ),
-  //         hintText: "Nombre completo",
-  //         hintStyle: const TextStyle(
-  //             color: color2,
-  //             fontSize: 18,
-  //             fontWeight: FontWeight.bold,
-  //             fontFamily: 'Urbanist'),
-  //         border: InputBorder.none,
-  //       ),
-  //     ),
-  //   );
-  // }
+  Widget _crearFullname() {
+    final registerForm = Provider.of<RegisterFormProvider>(context);
+    return Container(
+      margin: const EdgeInsets.only(left: 10, right: 10),
+      child: TextFormField(
+        autocorrect: false,
+        keyboardType: TextInputType.text,
+        onChanged: (value) => registerForm.fullName = value,
+        validator: (value) => value == null || value.isEmpty
+            ? 'El campo no puede estar vacio'
+            : null,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Urbanist',
+        ),
+        controller: fullName,
+        //cursorColor: firstColor,
+        decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: color6, width: 2.0),
+              borderRadius: BorderRadius.circular(20)),
+          focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.white, width: 2.0),
+              borderRadius: BorderRadius.circular(20)),
+          prefixIcon: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Icon(
+              Icons.person,
+              color: color6,
+              size: 30,
+            ),
+          ),
+          hintText: "Nombre completo",
+          hintStyle: const TextStyle(
+              color: color2,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Urbanist'),
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
 }

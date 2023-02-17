@@ -17,7 +17,11 @@ class ProductsCar {
     var rsp = jsonDecode(response);
     if (rsp['type'] == 'success') {
       Cart cart = Cart.fromJson(rsp);
-      return cart.cart!.items!;
+      if (cart.cart?.items == null) {
+        return [];
+      } else {
+        return cart.cart!.items!;
+      }
     } else {
       print('No hay productos en el carrito');
       return [];
