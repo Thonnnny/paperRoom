@@ -1,3 +1,4 @@
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
@@ -12,11 +13,12 @@ class TestScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: color2,
       body: Center(
         child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 70),
+          margin: const EdgeInsets.symmetric(vertical: 50),
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
@@ -27,8 +29,8 @@ class TestScreen extends StatelessWidget {
               ),
               Lottie.asset('assets/images/Working.json'),
               Container(
-                height: 50,
-                width: 200,
+                height: size.height * 0.08,
+                width: size.width * 0.8,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color5,

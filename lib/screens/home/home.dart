@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 elevation: 30,
                 centerTitle: true,
                 backgroundColor: color5,
-                iconTheme: IconThemeData(color: Colors.white, size: 34),
+                iconTheme: IconThemeData(color: Colors.transparent, size: 34),
                 pinned: true,
                 flexibleSpace: HomeAppBar(),
               ),

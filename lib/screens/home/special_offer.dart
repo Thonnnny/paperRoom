@@ -28,6 +28,7 @@ class _SpecialOffersState extends State<SpecialOffers> {
   }
 
   int items = 0;
+  List<Widget> list = [];
   int selectIndex = 0;
 
   @override
@@ -61,6 +62,8 @@ class _SpecialOffersState extends State<SpecialOffers> {
                     onPageChanged: (value) {
                       setState(() {
                         selectIndex = value;
+                        items = snapshot.data!.length;
+                        list = [];
                       });
                     },
                   );
@@ -128,8 +131,9 @@ class _SpecialOffersState extends State<SpecialOffers> {
   }
 
   Widget buildPageIndicator(int items) {
+    print('items: $items');
     var size = MediaQuery.of(context).size;
-    List<Widget> list = [];
+
     for (int i = 0; i < items; i++) {
       list.add(i == selectIndex ? indicator(true) : indicator(false));
     }

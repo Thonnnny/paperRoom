@@ -300,7 +300,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hintText: "Correo electrónico",
           hintStyle: const TextStyle(
               color: color2,
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               fontFamily: 'Urbanist'),
           border: InputBorder.none,
@@ -340,7 +340,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hintText: "Contraseña",
           hintStyle: const TextStyle(
               color: color2,
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               fontFamily: 'Urbanist'),
           prefixIcon: const Icon(
@@ -418,10 +418,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           focusedBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: Colors.white, width: 2.0),
               borderRadius: BorderRadius.circular(20)),
-          hintText: "Contraseña de nuevo",
+          hintText: "Confirmar contraseña",
           hintStyle: const TextStyle(
               color: color2,
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               fontFamily: 'Urbanist'),
           prefixIcon: const Icon(
@@ -542,7 +542,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hintText: "Nombre completo",
           hintStyle: const TextStyle(
               color: color2,
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               fontFamily: 'Urbanist'),
           border: InputBorder.none,

@@ -125,6 +125,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                   ),
                 ),
               ),
+
               IconButton(
                 iconSize: 28,
                 icon: const Icon(Icons.login_rounded,

@@ -1,4 +1,4 @@
-package com.example.freshbuyer;
+package com.thepaperoom.flutterpaperoom;
 
 import io.flutter.embedding.android.FlutterActivity;
 

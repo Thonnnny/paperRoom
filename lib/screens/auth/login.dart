@@ -281,7 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
           hintText: "Usuario",
           hintStyle: const TextStyle(
               color: color2,
-              fontSize: 18,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               fontFamily: 'Urbanist'),
           border: InputBorder.none,
@@ -321,7 +321,7 @@ class _LoginScreenState extends State<LoginScreen> {
           hintText: "Contraseña",
           hintStyle: const TextStyle(
               color: color2,
-              fontSize: 18,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               fontFamily: 'Urbanist'),
           prefixIcon: const Icon(

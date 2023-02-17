@@ -47,8 +47,8 @@ class _ProductCardState extends State<ProductCard> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    height: 150.0,
-                    width: 150.0,
+                    height: size.height * 0.2,
+                    width: size.width * 0.4,
                     decoration: BoxDecoration(
                         color: color5, //PARA PROBAR CONTAINER
                         borderRadius: BorderRadius.circular(15.0),
@@ -83,13 +83,11 @@ class _ProductCardState extends State<ProductCard> {
             ),
           ),
           Container(
-            width: size.width * 0.5,
+            width: size.width * 0.4,
             child: Column(
               children: [
                 const SizedBox(height: 12),
                 Container(
-                  width: size.width,
-                  height: size.height * 0.085,
                   child: Text(
                     '${widget.data.name.split('').first.toUpperCase() + widget.data.name.split('').sublist(1).join('')}',
                     //overflow: TextOverflow.ellipsis,
@@ -97,25 +95,17 @@ class _ProductCardState extends State<ProductCard> {
                     style: const TextStyle(
                       color: color6,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 15,
                     ),
                   ),
                 ),
                 const SizedBox(
                   height: 10,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: _buildSoldPoint(4.5, 6937),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  '\$${widget.data.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold, color: color2),
-                ),
+                //_buildSoldPoint(4.5, 6937),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   // ignore: prefer_const_literals_to_create_immutables
                   children: [
                     const Text(
@@ -125,23 +115,13 @@ class _ProductCardState extends State<ProductCard> {
                           fontWeight: FontWeight.w500,
                           color: color6),
                     ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      '|',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: color6,
-                          fontSize: 14),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Entrega 24h',
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: color6),
-                    ),
                   ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '\$${widget.data.price.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold, color: color3),
                 ),
               ],
             ),

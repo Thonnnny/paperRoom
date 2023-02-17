@@ -84,8 +84,8 @@ class _ProductInCardOrderState extends State<ProductInCardOrder> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    height: 150.0,
-                    width: 150.0,
+                    height: size.height * 0.15,
+                    width: size.width * 0.3,
                     decoration: BoxDecoration(
                         color: color5, //PARA PROBAR CONTAINER
                         borderRadius: BorderRadius.circular(15.0),
@@ -165,7 +165,7 @@ class _ProductInCardOrderState extends State<ProductInCardOrder> {
                 Row(
                   children: [
                     const Text(
-                      'Precio por unidad:',
+                      'Precio:',
                       style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,

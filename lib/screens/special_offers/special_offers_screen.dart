@@ -32,7 +32,7 @@ class _SpecialOfferScreenState extends State<SpecialOfferScreen> {
       backgroundColor: color4,
       appBar: FRAppBar.defaultAppBar(
         context,
-        title: 'Ofertas especiales',
+        title: 'Ofertas',
         actions: [
           IconButton(
             icon: Image.asset('assets/icons/search@2x.png', scale: 2.0),

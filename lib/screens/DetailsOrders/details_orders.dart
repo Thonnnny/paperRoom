@@ -525,7 +525,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                           'Ver detalles del pedido',
                                           style: TextStyle(
                                               color: color3,
-                                              fontSize: 15,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.bold,
                                               fontFamily: 'Urbanist'),
                                         ),

@@ -127,13 +127,13 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            width: size.width * 0.75,
+            width: size.width * 0.6,
             child: Center(
               child: Text(
                 '${widget.product.name}',
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
                 style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 32, color: color2),
+                    fontWeight: FontWeight.bold, fontSize: 25, color: color2),
               ),
             ),
           ),
@@ -216,56 +216,53 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   }
 
   Widget _buildQuantity() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 50, right: 50),
-      child: Row(
-        children: [
-          const Text('Cantidad',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 18, color: color5)),
-          const SizedBox(width: 20),
-          Container(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(24)),
-              color: color4,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Material(
-              color: Colors.transparent,
-              child: Row(
-                children: [
-                  InkWell(
-                    child: Image.asset(
-                      'assets/icons/detail/minus@2x.png',
-                      scale: 2,
-                      color: color6,
-                    ),
-                    onTap: () {
-                      if (_quantity <= 0) return;
-                      setState(() => _quantity -= 1);
-                    },
+    return Row(
+      children: [
+        const Text('Cantidad',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 18, color: color5)),
+        const SizedBox(width: 20),
+        Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(24)),
+            color: color4,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Material(
+            color: Colors.transparent,
+            child: Row(
+              children: [
+                InkWell(
+                  child: Image.asset(
+                    'assets/icons/detail/minus@2x.png',
+                    scale: 2,
+                    color: color6,
                   ),
-                  const SizedBox(width: 20),
-                  Text('$_quantity',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: color3)),
-                  const SizedBox(width: 20),
-                  InkWell(
-                    child: Image.asset(
-                      'assets/icons/detail/plus@2x.png',
-                      scale: 2,
-                      color: color6,
-                    ),
-                    onTap: () => setState(() => _quantity += 1),
+                  onTap: () {
+                    if (_quantity <= 0) return;
+                    setState(() => _quantity -= 1);
+                  },
+                ),
+                const SizedBox(width: 20),
+                Text('$_quantity',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: color3)),
+                const SizedBox(width: 20),
+                InkWell(
+                  child: Image.asset(
+                    'assets/icons/detail/plus@2x.png',
+                    scale: 2,
+                    color: color6,
                   ),
-                ],
-              ),
+                  onTap: () => setState(() => _quantity += 1),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

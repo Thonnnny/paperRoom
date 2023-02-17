@@ -85,7 +85,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               // ignore: prefer_const_literals_to_create_immutables
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 80.0),
+                padding: const EdgeInsets.only(left: 50, right: 40),
                 child: Row(children: const <Widget>[
                   Text(
                     'Powered with',

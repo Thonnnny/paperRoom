@@ -732,8 +732,8 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buldFloatBar() {
     buildAddCard() => Container(
-          height: 58,
-          width: getProportionateScreenWidth(258),
+          height: 54,
+          width: getProportionateScreenWidth(200),
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(29)),
             color: Colors.green[500],
@@ -765,7 +765,7 @@ class _CartScreenState extends State<CartScreen> {
                     'Realizar Pedido',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 12,
                       color: color2,
                     ),
                   ),
@@ -852,7 +852,7 @@ class _CartScreenState extends State<CartScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            width: size.width * 0.75,
+            width: size.width * 0.7,
             child: const Center(
               child: Text(
                 'Detalles de la orden',

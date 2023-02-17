@@ -107,8 +107,8 @@ class SpecialOfferCardWidget extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            height: 160.0,
-                            width: 160.0,
+                            height: size.height * 0.3,
+                            width: size.width * 0.4,
                             decoration: BoxDecoration(
                               color: color5, //PARA PROBAR CONTAINER
                               borderRadius: BorderRadius.circular(30.0),

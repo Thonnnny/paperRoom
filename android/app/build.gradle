@@ -25,6 +25,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
+   def keystoreProperties = new Properties()
+   def keystorePropertiesFile = rootProject.file('key.properties')
+   if (keystorePropertiesFile.exists()) {
+       keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+   }
+
 android {
     compileSdkVersion 33
     ndkVersion flutter.ndkVersion
@@ -36,25 +42,34 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.freshbuyer"
+        applicationId "com.thepaperoom.flutterpaperoom"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion 19
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        minSdkVersion 22
+        targetSdkVersion 31
+        versionCode 3
+        versionName "1.0.2"
         multiDexEnabled true
     }
 
-    buildTypes {
+        signingConfigs {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
         }
     }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
+
+
 }
 dependencies{
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation platform('com.google.firebase:firebase-bom:31.1.1')
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'androidx.multidex:multidex:2.0.1'
@@ -62,4 +77,27 @@ dependencies{
 
 flutter {
     source '../..'
+}
+
+afterEvaluate {
+    mergeReleaseJniLibFolders.doLast {
+        def archTypes = ["arm-release", "arm64-release"]
+        archTypes.forEach { item ->
+            copy {
+                from zipTree("$flutterRoot/bin/cache/artifacts/engine/android-$item/flutter.jar")
+                include 'lib/*/libflutter.so'
+                into "$buildDir/intermediates/jniLibs/release/"
+                eachFile {
+                    it.path = it.path.replaceFirst("lib/", "")
+                }
+            }
+        }
+    }
+}
+
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
