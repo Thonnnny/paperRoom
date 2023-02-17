@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:freshbuyer/cart/cart_screen.dart';
 import 'package:freshbuyer/constants.dart';
-import 'package:freshbuyer/screens/test/ordersScreen.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashOrdersScreen extends StatefulWidget {
@@ -27,7 +27,9 @@ class _SplashOrdersScreenState extends State<SplashOrdersScreen> {
     Navigator.of(context).pushReplacement(new MaterialPageRoute(
       builder: (BuildContext context) {
         // ignore: prefer_const_constructors
-        return OrdersScreen();
+        return CartScreen(
+          product: [],
+        );
       },
     ));
   }

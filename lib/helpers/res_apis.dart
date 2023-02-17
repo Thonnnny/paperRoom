@@ -14,6 +14,11 @@ class RestApis {
       'https://thepaperoom.com/api/getSubdivisionsByCountry/'; //+idCountry
   static String getCities =
       'https://thepaperoom.com/api/getCitiesBySubdivision/';
+  static String getActiveOrders =
+      'https://thepaperoom.com/api/getActivesOrders';
+  static String getHistoryOrders = 'https://thepaperoom.com/api/ordersHistory';
+  static String getOrderDetails =
+      'https://thepaperoom.com/api/orderDetails/'; //+idOrder
 
   //////////////////POST/////////////////////
   static String apiLogin = 'https://thepaperoom.com/api/login';

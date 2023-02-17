@@ -1,8 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:freshbuyer/class/classActiveOrders.dart';
 import 'package:freshbuyer/components/app_bar.dart';
 import 'package:freshbuyer/constants.dart';
+import 'package:freshbuyer/model/activeResponses.dart';
+import 'package:lottie/lottie.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,6 +24,10 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   dynamic userID;
   List<dynamic> arrayhistory = [];
+  List<dynamic> arrayDeactiveHistory = [];
+  List<dynamic> detailsOrder = [];
+  bool showActiveOrders = false;
+  bool showHistory = false;
   int? option;
 
   void getUser() async {
@@ -36,414 +43,756 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void initState() {
     super.initState();
     getUser();
+    getActiveOrders();
+    getHistoryOrders();
+    // getDetailsOrder(arrayhistory);
+    showActiveOrders = true;
+    showHistory = false;
   }
 
-  void getCartDetails(int isHistory, BuildContext context) async {
+  Future<void> getActiveOrders() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('accesstoken');
-
-    final response = await BaseClient().get(RestApis.getCart,
+    String? token = prefs.getString('accesstoken');
+    var response = await BaseClient().get(RestApis.getActiveOrders,
         {"Content-Type": "application/json", "accesstoken": token});
-    final rsp = jsonDecode(response);
+    var rsp = jsonDecode(response);
     if (rsp['type'] == 'success') {
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Oops...',
-        text: '${rsp['msg']}',
-        confirmBtnColor: Colors.red,
-        confirmBtnText: 'Reintentar',
-      );
-    } else {
+      List<dynamic> activeOrders = rsp['activeOrders'];
+      print('This is the response from the active orders screen');
+      print(activeOrders);
       setState(() {
-        arrayhistory = rsp['cart'];
+        arrayhistory = activeOrders;
       });
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.success,
-        title: 'Exito',
-        text: '${rsp['message']}',
-        confirmBtnColor: Colors.green,
-        confirmBtnText: 'Aceptar',
-      );
+      if (arrayhistory.isEmpty) {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Oops...',
+          text: '${rsp['message']}',
+          confirmBtnColor: Colors.red,
+          confirmBtnText: 'Reintentar',
+        );
+      } else {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          title: '${rsp['title']}',
+          text: '${rsp['message']}',
+          confirmBtnColor: Colors.green,
+          confirmBtnText: 'Continuar',
+        );
+      }
+    } else {
+      print('No hay ordenes activas');
+      setState(() {
+        arrayhistory = [];
+      });
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: color5,
-        appBar: FRAppBar.defaultAppBar(
-          context,
-          title: 'Detalles de ordenes',
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 35, vertical: 10),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 130,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          elevation: 15,
-                          backgroundColor: option == 0 ? color6 : color1,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        onPressed: () {
-                          print('this is history button Activo');
-                          //historyState(0, context);
-                        },
-                        child: Text('Activo',
-                            style: TextStyle(
-                              color: option == 0 ? Colors.white : Colors.black,
-                            )),
-                      ),
-                    ),
-                    const SizedBox(width: 24),
-                    SizedBox(
-                      width: 130,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          elevation: 15,
-                          backgroundColor: option == 1 ? color6 : color1,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        onPressed: () {
-                          print('this is history button Historial');
-                          //historyState(1, context);
-                        },
-                        child: Text('Historial',
-                            style: TextStyle(
-                                color:
-                                    option == 1 ? Colors.white : Colors.black)),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              // Container(
-              //   padding:
-              //       const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              //   child: _buildList(context),
-              // ),
-            ],
-          ),
-        ));
+  Future<void> getHistoryOrders() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('accesstoken');
+    var response = await BaseClient().get(RestApis.getHistoryOrders,
+        {"Content-Type": "application/json", "accesstoken": token});
+    var rsp = jsonDecode(response);
+    print(response);
+    if (rsp['type'] == 'success') {
+      List<dynamic> historyOrders = rsp['historyOrders'];
+      print('This is the response from the history orders screen');
+      print(historyOrders);
+      setState(() {
+        arrayDeactiveHistory = historyOrders;
+      });
+      if (arrayDeactiveHistory.isEmpty) {}
+    } else {
+      print('No hay ordenes en el Historial');
+      setState(() {
+        arrayDeactiveHistory = [];
+      });
+    }
   }
 
-  // Widget _buildList(BuildContext context) {
-  //   return SingleChildScrollView(
-  //     child: Column(
-  //       children: [
-  //         ListView.builder(
-  //           itemCount: arrayhistory.length,
-  //           scrollDirection: Axis.vertical,
-  //           shrinkWrap: true,
-  //           physics: const ClampingScrollPhysics(),
-  //           itemBuilder: (context, index) {
-  //            // print(arrayhistory[index]);
-  //             return option == 0
-  //                 ? Column(
-  //                     children: [
-  //                       Card(
-  //                         color: Colors.grey[100],
-  //                         shape: RoundedRectangleBorder(
-  //                             borderRadius: BorderRadius.circular(10)),
-  //                         margin: const EdgeInsets.all(5.0),
-  //                         elevation: 10,
-  //                         child: Column(
-  //                           children: [
-  //                             Padding(
-  //                               padding: EdgeInsets.all(5.0),
-  //                               child: ExpansionTile(
-  //                                 collapsedIconColor: blueDark,
-  //                                 collapsedTextColor: Colors.black,
-  //                                 textColor: redLight,
-  //                                 title: Column(
-  //                                   crossAxisAlignment:
-  //                                       CrossAxisAlignment.start,
-  //                                   children: [
-  //                                     Row(
-  //                                       children: [
-  //                                         const Icon(
-  //                                           Icons.person,
-  //                                           color: redLight,
-  //                                           size: 35,
-  //                                         ),
-  //                                         Text(
-  //                                           arrayhistory[index]['Visitante'] ==
-  //                                                   ''
-  //                                               ? 'Visitante'
-  //                                               : arrayhistory[index]
-  //                                                   ['Visitante'],
-  //                                           style: const TextStyle(
-  //                                             fontWeight: FontWeight.bold,
-  //                                             fontSize: 18,
-  //                                           ),
-  //                                         ),
-  //                                       ],
-  //                                     )
-  //                                   ],
-  //                                 ),
-  //                                 children: [
-  //                                   ListTile(
-  //                                     contentPadding:
-  //                                         const EdgeInsets.symmetric(
-  //                                             vertical: 0, horizontal: 20),
-  //                                     title: const Text('Fecha de Asignada: ',
-  //                                         style: TextStyle(
-  //                                             color: Colors.black,
-  //                                             fontWeight: FontWeight.bold,
-  //                                             fontSize: 18.0)),
-  //                                     subtitle: Text(
-  //                                         '${arrayhistory[index]['FechaAsignada']}',
-  //                                         style: const TextStyle(
-  //                                             color: Colors.black,
-  //                                             fontWeight: FontWeight.normal,
-  //                                             fontSize: 15.0)),
-  //                                     leading: const Icon(
-  //                                         Icons.calendar_month_outlined,
-  //                                         color: redLight,
-  //                                         size: 35.0),
-  //                                   ),
-  //                                   ListTile(
-  //                                     contentPadding:
-  //                                         const EdgeInsets.symmetric(
-  //                                             vertical: 0, horizontal: 20),
-  //                                     title: const Text('Hora de Asignada: ',
-  //                                         style: TextStyle(
-  //                                             color: Colors.black,
-  //                                             fontWeight: FontWeight.bold,
-  //                                             fontSize: 18.0)),
-  //                                     subtitle: Text(
-  //                                         '${arrayhistory[index]['HoraAsignada']}',
-  //                                         style: const TextStyle(
-  //                                             color: Colors.black,
-  //                                             fontWeight: FontWeight.normal,
-  //                                             fontSize: 15.0)),
-  //                                     leading: const Icon(
-  //                                         Icons.access_time_filled,
-  //                                         color: redLight,
-  //                                         size: 35.0),
-  //                                   ),
-  //                                   ListTile(
-  //                                     contentPadding:
-  //                                         const EdgeInsets.symmetric(
-  //                                             vertical: 0, horizontal: 20),
-  //                                     title: const Text('Fecha de Entrada: ',
-  //                                         style: TextStyle(
-  //                                             color: Colors.black,
-  //                                             fontWeight: FontWeight.bold,
-  //                                             fontSize: 18.0)),
-  //                                     subtitle: Text(
-  //                                         arrayhistory[index]['FechaEntrada'] ==
-  //                                                 null
-  //                                             ? 'No ha ingresado'
-  //                                             : '${arrayhistory[index]['FechaEntrada']}',
-  //                                         style: const TextStyle(
-  //                                             color: Colors.black,
-  //                                             fontWeight: FontWeight.normal,
-  //                                             fontSize: 15.0)),
-  //                                     leading: const Icon(
-  //                                         Icons.calendar_month_outlined,
-  //                                         color: redLight,
-  //                                         size: 35.0),
-  //                                   ),
-  //                                   ListTile(
-  //                                     contentPadding:
-  //                                         const EdgeInsets.symmetric(
-  //                                             vertical: 0, horizontal: 20),
-  //                                     title: const Text('Hora de Entrada: ',
-  //                                         style: TextStyle(
-  //                                             color: Colors.black,
-  //                                             fontWeight: FontWeight.bold,
-  //                                             fontSize: 18.0)),
-  //                                     subtitle: Text(
-  //                                         arrayhistory[index]['HoraEntrada'] ==
-  //                                                 null
-  //                                             ? 'No ha ingresado'
-  //                                             : '${arrayhistory[index]['HoraEntrada']}',
-  //                                         style: const TextStyle(
-  //                                             color: Colors.black,
-  //                                             fontWeight: FontWeight.normal,
-  //                                             fontSize: 15.0)),
-  //                                     leading: const Icon(
-  //                                         Icons.access_time_filled,
-  //                                         color: redLight,
-  //                                         size: 35.0),
-  //                                   ),
-  //                                 ],
-  //                               ),
-  //                             ),
-  //                           ],
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   )
-  //                 : Card(
-  //                     color: Colors.grey[100],
-  //                     shape: RoundedRectangleBorder(
-  //                         borderRadius: BorderRadius.circular(10)),
-  //                     margin: const EdgeInsets.all(5.0),
-  //                     elevation: 10,
-  //                     child: Column(
-  //                       children: [
-  //                         Padding(
-  //                           padding: EdgeInsets.all(5.0),
-  //                           child: ExpansionTile(
-  //                             collapsedIconColor: blueDark,
-  //                             collapsedTextColor: Colors.black,
-  //                             textColor: redLight,
-  //                             title: Column(
-  //                               crossAxisAlignment: CrossAxisAlignment.start,
-  //                               children: [
-  //                                 Row(
-  //                                   children: [
-  //                                     const Icon(
-  //                                       Icons.person,
-  //                                       color: redLight,
-  //                                       size: 35,
-  //                                     ),
-  //                                     Text(
-  //                                       arrayhistory[index]['Visitante'] == ''
-  //                                           ? 'Visitante'
-  //                                           : arrayhistory[index]['Visitante'],
-  //                                       style: const TextStyle(
-  //                                         fontWeight: FontWeight.bold,
-  //                                         fontSize: 18,
-  //                                       ),
-  //                                     ),
-  //                                   ],
-  //                                 )
-  //                               ],
-  //                             ),
-  //                             children: [
-  //                               ListTile(
-  //                                 contentPadding: const EdgeInsets.symmetric(
-  //                                     vertical: 0, horizontal: 20),
-  //                                 title: const Text('Fecha de entrada: ',
-  //                                     style: TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.bold,
-  //                                         fontSize: 18.0)),
-  //                                 subtitle: Text(
-  //                                     '${arrayhistory[index]['FechaEntrada']}',
-  //                                     style: const TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.normal,
-  //                                         fontSize: 15.0)),
-  //                                 leading: const Icon(
-  //                                     Icons.calendar_month_outlined,
-  //                                     color: redLight,
-  //                                     size: 35.0),
-  //                               ),
-  //                               ListTile(
-  //                                 contentPadding: const EdgeInsets.symmetric(
-  //                                     vertical: 0, horizontal: 20),
-  //                                 title: const Text('Hora de entrada: ',
-  //                                     style: TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.bold,
-  //                                         fontSize: 18.0)),
-  //                                 subtitle: Text(
-  //                                     '${arrayhistory[index]['HoraEntrada']}',
-  //                                     style: const TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.normal,
-  //                                         fontSize: 15.0)),
-  //                                 leading: const Icon(Icons.access_time_filled,
-  //                                     color: redLight, size: 35.0),
-  //                               ),
-  //                               ListTile(
-  //                                 contentPadding: const EdgeInsets.symmetric(
-  //                                     vertical: 0, horizontal: 20),
-  //                                 title: const Text('Fecha de salida: ',
-  //                                     style: TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.bold,
-  //                                         fontSize: 18.0)),
-  //                                 subtitle: Text(
-  //                                     '${arrayhistory[index]['FechaSalida']}',
-  //                                     style: const TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.normal,
-  //                                         fontSize: 15.0)),
-  //                                 leading: const Icon(
-  //                                     Icons.calendar_month_outlined,
-  //                                     color: redLight,
-  //                                     size: 35.0),
-  //                               ),
-  //                               ListTile(
-  //                                 contentPadding: const EdgeInsets.symmetric(
-  //                                     vertical: 0, horizontal: 20),
-  //                                 title: const Text('Hora de salida: ',
-  //                                     style: TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.bold,
-  //                                         fontSize: 18.0)),
-  //                                 subtitle: Text(
-  //                                     '${arrayhistory[index]['HoraSalida']}',
-  //                                     style: const TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.normal,
-  //                                         fontSize: 15.0)),
-  //                                 leading: const Icon(Icons.access_time_filled,
-  //                                     color: redLight, size: 35.0),
-  //                               ),
-  //                               ListTile(
-  //                                 contentPadding: const EdgeInsets.symmetric(
-  //                                     vertical: 0, horizontal: 20),
-  //                                 title: const Text('Guardia de entrada: ',
-  //                                     style: TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.bold,
-  //                                         fontSize: 18.0)),
-  //                                 subtitle: Text(
-  //                                     arrayhistory[index]['PrimerG'] ??
-  //                                         'Pendiente',
-  //                                     style: const TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.normal,
-  //                                         fontSize: 15.0)),
-  //                                 leading: const Icon(Icons.policy_outlined,
-  //                                     color: redLight, size: 35.0),
-  //                               ),
-  //                               ListTile(
-  //                                 contentPadding: const EdgeInsets.symmetric(
-  //                                     vertical: 0, horizontal: 20),
-  //                                 title: const Text('Guardia de Salida: ',
-  //                                     style: TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.bold,
-  //                                         fontSize: 18.0)),
-  //                                 subtitle: Text(
-  //                                     arrayhistory[index]['SegundoG'] ??
-  //                                         'Pendiente',
-  //                                     style: const TextStyle(
-  //                                         color: Colors.black,
-  //                                         fontWeight: FontWeight.normal,
-  //                                         fontSize: 15.0)),
-  //                                 leading: const Icon(Icons.policy_outlined,
-  //                                     color: redLight, size: 35.0),
-  //                               ),
-  //                             ],
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   );
-  //           },
-  //         ),
-  //       ],
-  //     ),
-  //   );
+  // Future<void> getDetailsOrder(arrayhistory) async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? token = prefs.getString('accesstoken');
+  //   var response = await BaseClient().get(
+  //       RestApis.getOrderDetails + arrayhistory,
+  //       {"Content-Type": "application/json", "accesstoken": token});
+  //   var rsp = jsonDecode(response);
+  //   if (rsp['type'] == 'success') {
+  //     List<dynamic> orderDetails = rsp['orderDetails'];
+  //     print('This is the response from the active orders Details screen');
+  //     print(orderDetails);
+  //     setState(() {
+  //       detailsOrder = orderDetails;
+  //     });
+  //   } else {
+  //     print('No hay ordenes activas');
+  //     setState(() {
+  //       detailsOrder = [];
+  //     });
+  //   }
   // }
+
+  @override
+  Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    return Scaffold(
+      backgroundColor: color5,
+      appBar: FRAppBar.defaultAppBar(
+        context,
+        title: 'Detalles de ordenes',
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 130,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 15,
+                        backgroundColor:
+                            showActiveOrders == true ? color6 : color1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: () {
+                        print('this is active button Activo');
+                        setState(() {
+                          showActiveOrders = true;
+                          showHistory = false;
+                        });
+                        //historyState(0, context);
+                      },
+                      child: Text('Activo',
+                          style: TextStyle(
+                            color: showActiveOrders == true
+                                ? Colors.white
+                                : Colors.black,
+                          )),
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  SizedBox(
+                    width: 130,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 15,
+                        backgroundColor: showHistory == true ? color6 : color1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: () {
+                        print('this is history button Historial');
+                        //historyState(1, context);
+                        setState(() {
+                          showHistory = true;
+                          showActiveOrders = false;
+                        });
+                      },
+                      child: Text('Historial',
+                          style: TextStyle(
+                              color: showHistory == true
+                                  ? Colors.white
+                                  : Colors.black)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(
+              color: color4,
+              thickness: 3,
+            ),
+            if (showActiveOrders && arrayhistory.isNotEmpty) ...[
+              _builListActiveOrder(),
+            ],
+            if (showActiveOrders && arrayhistory.isEmpty) ...[
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 50),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Aun no tienes ordenes activas 😊\nHaz una orden!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 30),
+                      ),
+                      Lottie.asset('assets/images/OrderNow.json'),
+                      Container(
+                        height: 50,
+                        width: 200,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: color6,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(32.0),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/home');
+                          },
+                          child: const Text('Ordenar ahora',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Urbanist')),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            if (showActiveOrders == false &&
+                arrayDeactiveHistory.isNotEmpty) ...[
+              _builListHistoryOrder(),
+            ],
+            if (showActiveOrders == false && arrayDeactiveHistory.isEmpty) ...[
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 50),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Aun no tienes historial de ordenes😊\nHaz una orden!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 30),
+                      ),
+                      Lottie.asset('assets/images/OrderNow.json'),
+                      Container(
+                        height: 50,
+                        width: 200,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: color6,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(32.0),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/home');
+                          },
+                          child: const Text('Ordenar ahora',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Urbanist')),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _builListActiveOrder() {
+    var size = MediaQuery.of(context).size;
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              itemCount: arrayhistory.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  color: Colors.grey[100],
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  margin: const EdgeInsets.all(5.0),
+                  elevation: 10,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(5.0),
+                        child: ExpansionTile(
+                          collapsedIconColor: color6,
+                          collapsedTextColor: Colors.black,
+                          textColor: color3,
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Icon(
+                                    Icons.person,
+                                    color: color5,
+                                    size: 35,
+                                  ),
+                                  const SizedBox(width: 15),
+                                  Text(
+                                    arrayhistory[index]['client']['fullname'] ==
+                                            ''
+                                        ? 'Cliente'
+                                        : arrayhistory[index]['client']
+                                            ['fullname'],
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text('Informacion del usuario: ',
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15.0)),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 20),
+                                  title: const Text('Email: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15.0)),
+                                  subtitle: Text(
+                                      arrayhistory[index]['client']['email'] ==
+                                              ''
+                                          ? 'sin email'
+                                          : arrayhistory[index]['client']
+                                              ['email'],
+                                      style: const TextStyle(
+                                          color: color3,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(Icons.email,
+                                      color: color5, size: 35.0),
+                                ),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 20),
+                                  title: const Text('Telefono: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15.0)),
+                                  subtitle: Text(
+                                      arrayhistory[index]['client']['phone'] ==
+                                              ''
+                                          ? 'Sin telefono Registrado'
+                                          : arrayhistory[index]['client']
+                                              ['phone'],
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(Icons.phone,
+                                      color: color5, size: 35.0),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                const Text('Informacion del pedido: ',
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15.0)),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 14),
+                                  title: const Text('Estado  Actual: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0)),
+                                  subtitle: Text(
+                                      '${arrayhistory[index]['actualStatus']}',
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(
+                                      Icons.pending_actions_sharp,
+                                      color: color5,
+                                      size: 35.0),
+                                ),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 14),
+                                  title: const Text('Estado de pago: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0)),
+                                  subtitle: Text(
+                                      '${arrayhistory[index]['paymentStatus']}',
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(Icons.payment_rounded,
+                                      color: color5, size: 35.0),
+                                ),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 14),
+                                  title: const Text('Metodo de pago: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0)),
+                                  subtitle: Text(
+                                      '${arrayhistory[index]['paymentMethod']}',
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(Icons.payments,
+                                      color: color5, size: 35.0),
+                                ),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 14),
+                                  title: const Text('Cantidad de productos: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0)),
+                                  subtitle: Text(
+                                      '${arrayhistory[index]['itemsCount']}',
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(
+                                      Icons.shopping_cart_checkout,
+                                      color: color5,
+                                      size: 35.0),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.all(10),
+                                  width: size.width * 0.6,
+                                  height: size.height * 0.05,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: color5,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      // setState(() {
+                                      //   getDetailsOrder(
+                                      //       arrayhistory[index]['id']);
+                                      //   _showActiveOrders(
+                                      //       arrayhistory[index]['id']);
+                                      // });
+                                      // _showActiveOrders(
+                                      //     arrayhistory[index]['id']);
+                                    },
+                                    child: Row(
+                                      // ignore: prefer_const_literals_to_create_immutables
+                                      children: [
+                                        const Icon(
+                                          Icons.remove_red_eye,
+                                          color: color2,
+                                          size: 25,
+                                        ),
+                                        SizedBox(width: size.width * 0.02),
+                                        const Text(
+                                          'Ver detalles del pedido',
+                                          style: TextStyle(
+                                              color: color3,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'Urbanist'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _builListHistoryOrder() {
+    var size = MediaQuery.of(context).size;
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              itemCount: arrayDeactiveHistory.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  color: Colors.grey[100],
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  margin: const EdgeInsets.all(5.0),
+                  elevation: 10,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(5.0),
+                        child: ExpansionTile(
+                          collapsedIconColor: color6,
+                          collapsedTextColor: Colors.black,
+                          textColor: color3,
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Icon(
+                                    Icons.person,
+                                    color: color5,
+                                    size: 35,
+                                  ),
+                                  const SizedBox(width: 15),
+                                  Text(
+                                    arrayDeactiveHistory[index]['client']
+                                                ['fullname'] ==
+                                            ''
+                                        ? 'Cliente'
+                                        : arrayhistory[index]['client']
+                                            ['fullname'],
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text('Informacion del usuario: ',
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15.0)),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 20),
+                                  title: const Text('Email: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15.0)),
+                                  subtitle: Text(
+                                      arrayDeactiveHistory[index]['client']
+                                                  ['email'] ==
+                                              ''
+                                          ? 'sin email'
+                                          : arrayDeactiveHistory[index]
+                                              ['client']['email'],
+                                      style: const TextStyle(
+                                          color: color3,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(Icons.email,
+                                      color: color5, size: 35.0),
+                                ),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 20),
+                                  title: const Text('Telefono: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15.0)),
+                                  subtitle: Text(
+                                      arrayDeactiveHistory[index]['client']
+                                                  ['phone'] ==
+                                              ''
+                                          ? 'Sin telefono Registrado'
+                                          : arrayhistory[index]['client']
+                                              ['phone'],
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(Icons.phone,
+                                      color: color5, size: 35.0),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                const Text('Informacion del pedido: ',
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15.0)),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 14),
+                                  title: const Text('Estado  Actual: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0)),
+                                  subtitle: Text(
+                                      '${arrayDeactiveHistory[index]['actualStatus']}',
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(
+                                      Icons.pending_actions_sharp,
+                                      color: color5,
+                                      size: 35.0),
+                                ),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 14),
+                                  title: const Text('Estado de pago: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0)),
+                                  subtitle: Text(
+                                      '${arrayDeactiveHistory[index]['paymentStatus']}',
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(Icons.payment_rounded,
+                                      color: color5, size: 35.0),
+                                ),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 14),
+                                  title: const Text('Metodo de pago: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0)),
+                                  subtitle: Text(
+                                      '${arrayDeactiveHistory[index]['paymentMethod']}',
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(Icons.payments,
+                                      color: color5, size: 35.0),
+                                ),
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 14),
+                                  title: const Text('Cantidad de productos: ',
+                                      style: TextStyle(
+                                          color: color6,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0)),
+                                  subtitle: Text(
+                                      '${arrayDeactiveHistory[index]['itemsCount']}',
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15.0)),
+                                  leading: const Icon(
+                                      Icons.shopping_cart_checkout,
+                                      color: color5,
+                                      size: 35.0),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.all(10),
+                                  width: size.width * 0.6,
+                                  height: size.height * 0.05,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: color5,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      // setState(() {
+                                      //   getDetailsOrder(
+                                      //       arrayhistory[index]['id']);
+                                      //   _showActiveOrders(
+                                      //       arrayhistory[index]['id']);
+                                      // });
+                                      // _showActiveOrders(
+                                      //     arrayhistory[index]['id']);
+                                    },
+                                    child: Row(
+                                      // ignore: prefer_const_literals_to_create_immutables
+                                      children: [
+                                        const Icon(
+                                          Icons.remove_red_eye,
+                                          color: color2,
+                                          size: 25,
+                                        ),
+                                        SizedBox(width: size.width * 0.02),
+                                        const Text(
+                                          'Ver detalles del pedido',
+                                          style: TextStyle(
+                                              color: color3,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'Urbanist'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
