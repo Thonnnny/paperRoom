@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ValidateToken {
   dynamic handleSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String yourToken = prefs.getString('token') ?? '';
+    String yourToken = prefs.getString('sessiontoken') ?? '';
     print('*************************this is the token*********************');
     if (yourToken.isNotEmpty) {
       print(yourToken);

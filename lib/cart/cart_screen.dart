@@ -6,6 +6,7 @@ import 'package:freshbuyer/class/classCustomer.dart';
 import 'package:freshbuyer/components/productsInCart.dart';
 import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/model/cartResponses.dart';
+import 'package:freshbuyer/screens/auth/login.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -21,16 +22,13 @@ import '../components/splashorders_Screen.dart';
 import '../helpers/base_client.dart';
 import '../helpers/res_apis.dart';
 import '../model/customerResponse.dart';
-import '../model/productCartResponse.dart';
 import '../providers/orders_provider.dart';
 import '../screens/tabbar/tabbar.dart';
 import '../screens/test/waitingOrders.dart';
 import '../size_config.dart';
 
 class CartScreen extends StatefulWidget {
-  final List<CartClass> product;
-
-  const CartScreen({super.key, required this.product});
+  const CartScreen({super.key});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -41,15 +39,9 @@ class _CartScreenState extends State<CartScreen> {
   double borderRadius = 18;
   int amount = 1;
 
-  late Future<List<dynamic>> _products;
-
-  late Future<Customer> _customer;
-  late Future<CartClass> _cart;
-
-  CustomerCar customerClass = CustomerCar();
-  ProductsCar apisClass = ProductsCar();
-  AddressInfo addressClass = AddressInfo();
-  CartOnlyObjectCar cartClass = CartOnlyObjectCar();
+  // CustomerCar customerClass = CustomerCar();
+  // ProductsCar apisClass = ProductsCar();
+  // CartOnlyObjectCar cartClass = CartOnlyObjectCar();
 
   String _countrySelected = '';
   String _citySelected = '';
@@ -58,70 +50,110 @@ class _CartScreenState extends State<CartScreen> {
   List<dynamic> countryList = [];
   List<dynamic> subdivisionList = [];
   List<dynamic> cityList = [];
-  List<String> filteredCities = [];
+
+  dynamic customerName = '';
+  dynamic actualStatus = '';
+  dynamic paymentStatus = '';
+  dynamic totalPrice = '';
+  Map<dynamic, dynamic> cartList = {};
+  List<dynamic> itemsList = [];
 
   late final List<String> _paymentMethods = ['cash', 'transfer'];
   late String _paymentSelected = 'cash';
 
   TextEditingController notaAdicional = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _customer = customerClass.getCustomerCart();
-    _products = apisClass.getCartProducts();
-    _cart = cartClass.getOnlyObjectCart();
-    _loadCountries();
-    notaAdicional = TextEditingController();
-
-    _cart.then((value) {
-      if (value.items!.isEmpty) {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const WaitingOrder()),
-            (route) => false);
-      }
-    });
-  }
-
   void createOrder(String reference, String city, String subdivision,
       String country, String paymentMethod) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('accesstoken');
-    Map data = {
-      'reference': reference,
-      'city': city,
-      'subdivision': subdivision,
-      'country': country,
-      'paymentMethod': paymentMethod,
-    };
-    print('This is your data to create order $data');
-    var response = await BaseClient().post(RestApis.apiCreateOrder, data,
-        {"Content-Type": "application/json", "accesstoken": token});
-    var rsp = jsonDecode(response);
-    print('This is your confirm Order response *****$rsp');
-    if (rsp['type'] == 'success') {
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.success,
-        title: '${rsp['title']}',
-        text: '${rsp['message']}',
-        confirmBtnColor: Colors.green,
-        confirmBtnText: 'Continuar',
-        onConfirmBtnTap: () {
-          Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      const SafeArea(child: FRTabbarScreen())),
-              (Route<dynamic> route) => false);
-        },
-      );
-    } else {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('accesstoken');
+      if (token == null || token.isEmpty) {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Error',
+          text: 'Necesitas iniciar sesión para realizar esta acción',
+          confirmBtnColor: Colors.red,
+          confirmBtnText: 'Continuar',
+          onConfirmBtnTap: () {
+            Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        const SafeArea(child: LoginScreen())),
+                (Route<dynamic> route) => false);
+          },
+        );
+      } else {
+        Map data = {
+          'reference': reference,
+          'city': city,
+          'subdivision': subdivision,
+          'country': country,
+          'paymentMethod': paymentMethod,
+        };
+        if (city.isEmpty ||
+            subdivision.isEmpty ||
+            country.isEmpty ||
+            paymentMethod.isEmpty) {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'Error',
+            text: 'Necesitas llenar todos los campos',
+            confirmBtnColor: Colors.red,
+            confirmBtnText: 'Continuar',
+            onConfirmBtnTap: () {
+              Navigator.of(context).pop();
+            },
+          );
+        } else {
+          print('This is your data to create order $data');
+          var response = await BaseClient().post(RestApis.apiCreateOrder, data,
+              {"Content-Type": "application/json", "accesstoken": token});
+          if (response != null) {
+            print(response);
+            var rsp = jsonDecode(response);
+            print('This is your confirm Order response *****$rsp');
+            if (rsp['type'] == 'success') {
+              QuickAlert.show(
+                context: context,
+                type: QuickAlertType.success,
+                title: '${rsp['title']}',
+                text: '${rsp['message']}',
+                confirmBtnColor: Colors.green,
+                confirmBtnText: 'Continuar',
+                onConfirmBtnTap: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              const SafeArea(child: SplashOrdersScreen())),
+                      (Route<dynamic> route) => false);
+                },
+              );
+            } else {
+              QuickAlert.show(
+                context: context,
+                type: QuickAlertType.error,
+                title: 'Oops...',
+                text: '${rsp['message']}',
+                confirmBtnColor: Colors.red,
+                confirmBtnText: 'Reintentar',
+              );
+            }
+          } else {
+            print('This is the response of create order $response');
+          }
+        }
+      }
+    } on Exception catch (e) {
+      print('Error: ');
+      print(e);
       QuickAlert.show(
         context: context,
         type: QuickAlertType.error,
         title: 'Oops...',
-        text: '${rsp['message']}',
+        text: '$e',
         confirmBtnColor: Colors.red,
         confirmBtnText: 'Reintentar',
       );
@@ -129,27 +161,29 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<List<dynamic>> _loadCountries() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('accesstoken');
-    var response = await BaseClient().get(RestApis.getCountry,
-        {"Content-Type": "application/json", "accesstoken": token});
-    var rsp = jsonDecode(response);
-    if (rsp['type'] == 'success') {
-      setState(() {
-        countryList = rsp['countries'];
-        print('This is the country list $countryList');
-      });
+    try {
+      var response = await BaseClient()
+          .get(RestApis.getCountry, {"Content-Type": "application/json"});
+      print('This is the response of country$response');
+      var rsp = jsonDecode(response);
+      if (rsp['type'] == 'success') {
+        setState(() {
+          countryList = rsp['countries'];
+          print('This is the country list $countryList');
+        });
+        return countryList;
+      }
       return countryList;
+    } catch (e) {
+      print('This is the error $e');
     }
     return countryList;
   }
 
   Future<List<dynamic>> _loadSubdivision() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('accesstoken');
     var response = await BaseClient().get(
         RestApis.getSubdivision + _countrySelected,
-        {"Content-Type": "application/json", "accesstoken": token});
+        {"Content-Type": "application/json"});
     var rsp = jsonDecode(response);
     if (rsp['type'] == 'success') {
       setState(() {
@@ -162,11 +196,9 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<List<dynamic>> _loadCities() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('accesstoken');
     var response = await BaseClient().get(
         RestApis.getCities + _subdivisionSelected,
-        {"Content-Type": "application/json", "accesstoken": token});
+        {"Content-Type": "application/json"});
     var rsp = jsonDecode(response);
     if (rsp['type'] == 'success') {
       setState(() {
@@ -178,89 +210,139 @@ class _CartScreenState extends State<CartScreen> {
     return cityList;
   }
 
+  Future<List<dynamic>> getCartInfo() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('accesstoken');
+      if (token!.isEmpty) {
+        // ignore: use_build_context_synchronously
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const WaitingOrder()),
+            (route) => false);
+      }
+      var response = await BaseClient().get(RestApis.getCart,
+          {"Content-Type": "application/json", "accesstoken": token});
+      var rsp = jsonDecode(response);
+      if (rsp['type'] == 'success') {
+        setState(() {
+          customerName = rsp['cart']['customer']['fullname'];
+          actualStatus = rsp['actualStatus'];
+          totalPrice = rsp['cart']['total'];
+          paymentStatus = rsp['cart']['paymentStatus'];
+          cartList = rsp['cart'];
+          itemsList = rsp['cart']['items'];
+          print('This is the cart list $cartList');
+          print('This is the items list $itemsList');
+          print('This is the customer name $customerName');
+          print('This is the actual status $actualStatus');
+          print('This is the total price $totalPrice');
+        });
+        return itemsList;
+      } else {
+        return itemsList;
+      }
+    } catch (e) {
+      print('This is the error from the getCartInfo function $e');
+    }
+    return itemsList;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCountries();
+    notaAdicional = TextEditingController();
+    getCartInfo();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Container(
-          color: color3,
-          child: Stack(
-            children: [
-              CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    pinned: true,
-                    expandedHeight: getProportionateScreenHeight(428),
-                    leading: IconButton(
-                      icon: Image.asset(
-                        'assets/icons/back@2x.png',
-                        scale: 1,
-                        color: color6,
+    if (cartList.isEmpty) {
+      return WaitingOrder();
+    } else {
+      return Scaffold(
+        body: SafeArea(
+          child: Container(
+            color: color3,
+            child: Stack(
+              children: [
+                CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      pinned: true,
+                      expandedHeight: getProportionateScreenHeight(428),
+                      leading: IconButton(
+                        icon: Image.asset(
+                          'assets/icons/back@2x.png',
+                          scale: 1,
+                          color: color6,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      const FRTabbarScreen()),
+                              (Route<dynamic> route) => false);
+                        },
                       ),
-                      onPressed: () {
-                        Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    const FRTabbarScreen()),
-                            (Route<dynamic> route) => false);
-                      },
-                    ),
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Container(
-                          color: color4,
-                          child:
-                              Lottie.asset('assets/images/prepareOrder.json')),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ..._buildTitle(),
-                          const SizedBox(height: 16),
-                          _buildLine(),
-                          const SizedBox(height: 8),
-                          customerInfo(context),
-                          const SizedBox(height: 16),
-                          _buildLine(),
-                          const SizedBox(height: 16),
-                          ..._buildPayment(),
-                          const SizedBox(height: 8),
-                          _crearMetodoDePago(),
-                          const SizedBox(height: 16),
-                          _buildLine(),
-                          const SizedBox(height: 16),
-                          ..._buildDirection(),
-                          const SizedBox(height: 16),
-                          _crearDireccion(),
-                          const SizedBox(height: 16),
-                          _buildLine(),
-                          const SizedBox(height: 8),
-                          ..._buildDescription(),
-                          const SizedBox(height: 8),
-                          _crearNotaAdicional(),
-                          const SizedBox(height: 16),
-                          _buildLine(),
-                          const SizedBox(height: 8),
-                          ..._buildCartTitle(),
-                          const SizedBox(height: 16),
-                          myProductListCart(context),
-                          const SizedBox(height: 16),
-                          const SizedBox(height: 115),
-                        ],
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Container(
+                            color: color4,
+                            child: Lottie.asset(
+                                'assets/images/prepareOrder.json')),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              _buldFloatBar()
-            ],
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ..._buildTitle(),
+                            const SizedBox(height: 16),
+                            _buildLine(),
+                            const SizedBox(height: 8),
+                            customerInfo(context),
+                            const SizedBox(height: 16),
+                            _buildLine(),
+                            const SizedBox(height: 16),
+                            ..._buildPayment(),
+                            const SizedBox(height: 8),
+                            _crearMetodoDePago(),
+                            const SizedBox(height: 16),
+                            _buildLine(),
+                            const SizedBox(height: 16),
+                            ..._buildDirection(),
+                            const SizedBox(height: 16),
+                            _crearDireccion(),
+                            const SizedBox(height: 16),
+                            _buildLine(),
+                            const SizedBox(height: 8),
+                            ..._buildDescription(),
+                            const SizedBox(height: 8),
+                            _crearNotaAdicional(),
+                            const SizedBox(height: 16),
+                            _buildLine(),
+                            const SizedBox(height: 8),
+                            ..._buildCartTitle(),
+                            const SizedBox(height: 16),
+                            myProductListCart(context),
+                            const SizedBox(height: 16),
+                            const SizedBox(height: 115),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                _buldFloatBar()
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Widget _crearDireccion() {
@@ -812,32 +894,22 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget totalInfo() {
-    return FutureBuilder<CartClass>(
-      future: _cart,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          var total = snapshot.data!.total;
-          if (total == null) {
-            return const AppText(
-              text: "\$0",
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              textAlign: TextAlign.right,
-              color: color6,
-            );
-          }
-          return AppText(
-            text: "\$${snapshot.data!.total.toString()}",
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            textAlign: TextAlign.right,
-            color: color6,
-          );
-        } else if (snapshot.hasError) {
-          return Text("${snapshot.error}");
-        }
-        return const CircularProgressIndicator();
-      },
+    var total = totalPrice;
+    if (total == null) {
+      return const AppText(
+        text: "\$0",
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+        textAlign: TextAlign.right,
+        color: color6,
+      );
+    }
+    return AppText(
+      text: "\$$totalPrice",
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      textAlign: TextAlign.right,
+      color: color6,
     );
   }
 
@@ -927,121 +999,75 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget customerInfo(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    return FutureBuilder<Customer>(
-      future: _customer,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView.builder(
-            itemCount: 1,
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              //Item cart = snapshot.data![index];
-              var name = snapshot.data?.fullname;
-              if (name == null) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  // ignore: prefer_const_literals_to_create_immutables
-                  children: [
-                    const Text('Nombre de Usuario',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: color5)),
-                    const Text('No hay datos de usuario',
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: color2)),
-                  ],
-                );
-              }
-              return Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Nombre de Usuario:',
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: color5)),
-                      Container(
-                        child: Text(
-                          "$name",
-                          textAlign: TextAlign.left,
-                          softWrap: true,
-                          style: const TextStyle(
-                              fontSize: 14,
-                              color: color2,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Urbanist'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            },
-          );
-        } else if (snapshot.hasError) {
-          return Text("${snapshot.error}");
-        }
-        return const CircularProgressIndicator();
-      },
-    );
+
+    if (customerName.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        // ignore: prefer_const_literals_to_create_immutables
+        children: [
+          const Text('Nombre de Usuario',
+              style: TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, color: color5)),
+          const Text('No hay datos de usuario',
+              style: TextStyle(
+                  fontSize: 14, fontWeight: FontWeight.w500, color: color2)),
+        ],
+      );
+    } else {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        // ignore: prefer_const_literals_to_create_immutables
+        children: [
+          const Text('Nombre de Usuario',
+              style: TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, color: color5)),
+          Text(customerName,
+              style: const TextStyle(
+                  fontSize: 14, fontWeight: FontWeight.w500, color: color2)),
+        ],
+      );
+    }
   }
 
   Widget myProductListCart(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    return FutureBuilder<List<dynamic>>(
-      future: _products,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    Item cart = snapshot.data![index];
-                    // ignore: unnecessary_null_comparison
-                    if (cart == null) {
-                      return const Text(
-                          'No puedes realizar un pedido vacío, inicia sesión y agrega productos a tu carrito',
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: color2));
-                    }
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      elevation: 10,
-                      color: color2,
-                      child: GestureDetector(
-                          child: Stack(
-                            children: <Widget>[
-                              ProductInCardOrder(
-                                data: cart,
-                              )
-                            ],
-                          ),
-                          onTap: () {}),
-                    );
-                  },
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          ListView.builder(
+            itemCount: itemsList.length,
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              // ignore: unnecessary_null_comparison
+              if (itemsList == null) {
+                return const Text(
+                    'No puedes realizar un pedido vacío, inicia sesión y agrega productos a tu carrito',
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: color2));
+              }
+              return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
-              ],
-            ),
-          );
-        } else if (snapshot.hasError) {
-          return Text("${snapshot.error}");
-        }
-        return const CircularProgressIndicator();
-      },
+                elevation: 10,
+                color: color2,
+                child: GestureDetector(
+                    child: Stack(
+                      children: <Widget>[
+                        ProductInCardOrder(
+                          data: itemsList[index],
+                        )
+                      ],
+                    ),
+                    onTap: () {}),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 

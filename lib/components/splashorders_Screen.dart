@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/cart/cart_screen.dart';
 import 'package:freshbuyer/constants.dart';
+import 'package:freshbuyer/screens/tabbar/tabbar.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashOrdersScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class _SplashOrdersScreenState extends State<SplashOrdersScreen> {
   void initState() {
     super.initState();
 
-    const delay = Duration(seconds: 4);
+    const delay = Duration(seconds: 3);
 
     Future.delayed(delay, () => onTimerFinished());
   }
@@ -27,9 +28,7 @@ class _SplashOrdersScreenState extends State<SplashOrdersScreen> {
     Navigator.of(context).pushReplacement(new MaterialPageRoute(
       builder: (BuildContext context) {
         // ignore: prefer_const_constructors
-        return CartScreen(
-          product: [],
-        );
+        return FRTabbarScreen();
       },
     ));
   }

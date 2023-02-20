@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/model/cartResponses.dart';
-import 'package:freshbuyer/model/productCartResponse.dart';
 import 'package:freshbuyer/model/productElement.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -20,7 +19,7 @@ bool _iscollected = false;
 class ProductInCardOrder extends StatefulWidget {
   const ProductInCardOrder({super.key, required this.data, this.ontap});
 
-  final Item data;
+  final dynamic data;
   final ProductinCardOnTaped? ontap;
 
   @override
@@ -91,7 +90,7 @@ class _ProductInCardOrderState extends State<ProductInCardOrder> {
                         borderRadius: BorderRadius.circular(15.0),
                         image: DecorationImage(
                           image: NetworkImage(
-                            "${widget.data.mainImage}",
+                            "${widget.data['mainImage']}",
                           ),
                           fit: BoxFit.cover,
                         ),
@@ -126,7 +125,7 @@ class _ProductInCardOrderState extends State<ProductInCardOrder> {
                   width: size.width,
                   height: size.height * 0.085,
                   child: Text(
-                    '${widget.data.productName!.split('').first.toUpperCase() + widget.data.productName!.split('').sublist(1).join('')}',
+                    '${widget.data['productName'].split('').first.toUpperCase() + widget.data['productName'].split('').sublist(1).join('')}',
                     //overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
@@ -153,7 +152,7 @@ class _ProductInCardOrderState extends State<ProductInCardOrder> {
                     const SizedBox(width: 10),
                     Text(
                       textAlign: TextAlign.right,
-                      "${widget.data.quantity}",
+                      "${widget.data['quantity']}",
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -172,7 +171,7 @@ class _ProductInCardOrderState extends State<ProductInCardOrder> {
                           color: color3),
                     ),
                     Text(
-                      '\$${widget.data.productBilledPrice}',
+                      '\$${widget.data['productBilledPrice']}',
                       style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,

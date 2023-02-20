@@ -12,11 +12,11 @@ class ProductsOfferRepository {
     String? token = prefs.getString('accesstoken');
     var response = await BaseClient()
         .get(RestApis.getProductInOffer, {"Content-Type": "application/json"});
-    print('This is the response from the Products in Offer screen');
-    print(response);
     var rsp = jsonDecode(response);
     if (rsp['type'] == 'success') {
       ProductsInOffer offer = ProductsInOffer.fromJson(rsp);
+      print('This is the response from the Products in Offer screen');
+      print(offer.offers);
       return offer.offers!;
     } else {
       print('No hay productos en ofertas');

@@ -41,38 +41,56 @@ class _HomeAppBarState extends State<HomeAppBar> {
   }
 
   void logOut() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('sessiontoken');
-    final loginProvider =
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('sessiontoken');
+      if (token == null || token.isEmpty) {
         // ignore: use_build_context_synchronously
-        Provider.of<LoginFormProvider>(context, listen: false);
-    var response = await BaseClient().get(RestApis.getLogOut,
-        {"Content-Type": "application/json", "sessiontoken": token});
-    var rsp = jsonDecode(response);
-    print(rsp);
-    if (rsp['type'] == "success") {
-      print('logout successful');
-      loginProvider.logOut();
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  const SafeArea(child: WelcomeScreen())),
-          (Route<dynamic> route) => false);
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.success,
-        title: 'Cerrando sesión',
-        text: '${rsp['message']}',
-        confirmBtnColor: Colors.green,
-        confirmBtnText: 'Continuar',
-      );
-    } else {
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  const SafeArea(child: SplashScreen())),
-          (Route<dynamic> route) => false);
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    const SafeArea(child: WelcomeScreen())),
+            (Route<dynamic> route) => false);
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          title: 'Cerrando sesión',
+          text: 'Sesión cerrada',
+          confirmBtnColor: Colors.green,
+          confirmBtnText: 'Continuar',
+        );
+      } else {
+        final loginProvider =
+            // ignore: use_build_context_synchronously
+            Provider.of<LoginFormProvider>(context, listen: false);
+        var response = await BaseClient().get(RestApis.getLogOut,
+            {"Content-Type": "application/json", "sessiontoken": token});
+        var rsp = jsonDecode(response);
+        print('this is a try to logout $rsp');
+        print(rsp);
+        if (rsp['type'] == "success") {
+          print('logout successful');
+          setState(() {
+            loginProvider.logOut();
+          });
+          // ignore: use_build_context_synchronously
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      const SafeArea(child: WelcomeScreen())),
+              (Route<dynamic> route) => false);
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.success,
+            title: 'Cerrando sesión',
+            text: '${rsp['message']}',
+            confirmBtnColor: Colors.green,
+            confirmBtnText: 'Continuar',
+          );
+        }
+      }
+    } catch (e) {
+      print('this is a try to logout $e');
     }
   }
 

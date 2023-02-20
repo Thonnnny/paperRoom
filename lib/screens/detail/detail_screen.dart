@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/components/loaderImage.dart';
+import 'package:freshbuyer/components/splashorders_Screen.dart';
 import 'package:freshbuyer/model/cartResponses.dart';
+import 'package:freshbuyer/screens/auth/login.dart';
 import 'package:freshbuyer/size_config.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -354,42 +356,69 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   }
 
   void addProductToCart(Product product) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('accesstoken');
-    Map data = {
-      'productId': product.id,
-      'quantity': _quantity,
-    };
-
-    print('This is your data: $data');
-    var response = await BaseClient().post(RestApis.apiAddProductToOrder, data,
-        {"Content-Type": "application/json", "accesstoken": token});
-    print(response);
-    var rsp = jsonDecode(response);
-    if (rsp['type'] == 'success') {
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.success,
-        title: 'Exito',
-        text: '${rsp['message']}',
-        confirmBtnColor: Colors.green,
-        confirmBtnText: 'Aceptar',
-        onConfirmBtnTap: () {
-          Navigator.pop(context);
-        },
-      );
-    } else {
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Error',
-        text: '${rsp['message']}',
-        confirmBtnColor: Colors.red,
-        confirmBtnText: 'Aceptar',
-        onConfirmBtnTap: () {
-          Navigator.pop(context);
-        },
-      );
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('accesstoken');
+      if (token == null) {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Error',
+          text:
+              'No se pudo agregar el producto debido a que no se ha iniciado sesión',
+          confirmBtnColor: Colors.red,
+          confirmBtnText: 'Aceptar',
+          onConfirmBtnTap: () {
+            Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        const SafeArea(child: LoginScreen())),
+                (Route<dynamic> route) => false);
+          },
+        );
+      } else {
+        Map data = {
+          'productId': product.id,
+          'quantity': _quantity,
+        };
+        print('This is your data: $data');
+        var response = await BaseClient().post(RestApis.apiAddProductToOrder,
+            data, {"Content-Type": "application/json", "accesstoken": token});
+        print(response);
+        var rsp = jsonDecode(response);
+        if (rsp['type'] == 'success') {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.success,
+            title: 'Exito',
+            text: '${rsp['message']}',
+            confirmBtnColor: Colors.green,
+            confirmBtnText: 'Aceptar',
+            onConfirmBtnTap: () {
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          const SafeArea(child: SplashOrdersScreen())),
+                  (Route<dynamic> route) => false);
+            },
+          );
+        } else {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'Error',
+            text: '${rsp['message']}',
+            confirmBtnColor: Colors.red,
+            confirmBtnText: 'Aceptar',
+            onConfirmBtnTap: () {
+              Navigator.pop(context);
+            },
+          );
+        }
+      }
+    } on Exception catch (e) {
+      print('Error: ');
+      print(e);
     }
   }
 }

@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/components/special_offer_widget.dart';
 import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/model/productsInOffer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../class/classProductsInOffer.dart';
+import '../../helpers/base_client.dart';
+import '../../helpers/res_apis.dart';
 import '../../model/oldCategory.dart';
 
 typedef SpecialOffersOnTapSeeAll = void Function();
@@ -19,17 +24,35 @@ class SpecialOffers extends StatefulWidget {
 
 class _SpecialOffersState extends State<SpecialOffers> {
   late final List<Category> categories = homeCategries;
-  late Future<List<Offer>> _products;
-  ProductsOfferRepository offer = ProductsOfferRepository();
+  List<dynamic> productInOfferList = [];
   @override
   void initState() {
     super.initState();
-    _products = offer.getProductsInOffer();
+    //_products = offer.getProductsInOffer();
+    getProductsInOffer();
   }
 
   int items = 0;
-  List<Widget> list = [];
   int selectIndex = 0;
+
+  Future<List<dynamic>> getProductsInOffer() async {
+    try {
+      var response = await BaseClient().get(
+          RestApis.getProductInOffer, {"Content-Type": "application/json"});
+      var rsp = jsonDecode(response);
+      if (rsp['type'] == 'success') {
+        setState(() {
+          productInOfferList = rsp['offers'];
+          print('This is the response from the Products in Offer screen');
+          print(productInOfferList);
+        });
+      }
+      return productInOfferList;
+    } catch (e) {
+      print('Error in getProductsInOffer: $e');
+    }
+    return [];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,31 +69,23 @@ class _SpecialOffersState extends State<SpecialOffers> {
               color: color3,
               borderRadius: BorderRadius.all(Radius.circular(32)),
             ),
-            child: FutureBuilder<List<Offer>>(
-              future: _products,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  items = snapshot.data!.length;
-                  return PageView.builder(
-                    itemBuilder: (context, index) {
-                      final data = snapshot.data![index];
-                      return SpecialOfferWidget(context,
-                          data: data, index: index);
-                    },
-                    itemCount: snapshot.data!.length,
-                    allowImplicitScrolling: true,
-                    onPageChanged: (value) {
-                      setState(() {
-                        selectIndex = value;
-                        items = snapshot.data!.length;
-                        list = [];
-                      });
-                    },
-                  );
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
+            child: PageView.builder(
+              itemBuilder: (context, index) {
+                if (productInOfferList.length == 0) {
+                  return const Center(child: CircularProgressIndicator());
+                } else {
+                  final data = productInOfferList[index];
+                  print('This is the data of Products in Offer: $data');
+                  return SpecialOfferWidget(context, data: data, index: index);
                 }
-                return const Center(child: CircularProgressIndicator());
+              },
+              itemCount: productInOfferList.length,
+              allowImplicitScrolling: true,
+              onPageChanged: (value) {
+                setState(() {
+                  selectIndex = value;
+                  items = productInOfferList.length;
+                });
               },
             ),
           ),
@@ -131,11 +146,10 @@ class _SpecialOffersState extends State<SpecialOffers> {
   }
 
   Widget buildPageIndicator(int items) {
-    print('items: $items');
     var size = MediaQuery.of(context).size;
-
+    List<Widget> list = [];
     for (int i = 0; i < items; i++) {
-      list.add(i == selectIndex ? indicator(true) : indicator(false));
+      list.add(indicator(i == selectIndex ? true : false));
     }
     if (items == 0) {
       list.add(indicator(true));

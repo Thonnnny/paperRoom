@@ -10,7 +10,7 @@ class SpecialOfferWidget extends StatelessWidget {
     required this.index,
   }) : super(key: key);
 
-  final Offer data;
+  final dynamic data;
   final BuildContext context;
   final int index;
 
@@ -35,7 +35,7 @@ class SpecialOfferWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "\$${data.price.toString()}",
+                  "\$${data['price'].toString()}",
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
@@ -51,20 +51,20 @@ class SpecialOfferWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "\$${data.offerPrice.toString()}",
+                  "\$${data['offerPrice'].toString()}",
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 20, color: color6),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  data.name.toString(),
+                  data['name'].toString(),
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 18, color: color5),
                 ),
                 _buildLine(),
                 const SizedBox(height: 12),
                 Text(
-                  data.description.toString(),
+                  data['description'].toString(),
                   style: const TextStyle(
                       fontWeight: FontWeight.w800, fontSize: 12, color: color2),
                 ),
@@ -80,7 +80,7 @@ class SpecialOfferWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(15.0),
               image: DecorationImage(
                 image: NetworkImage(
-                  data.mainImage.toString(),
+                  data['mainImage'].toString(),
                 ),
                 fit: BoxFit.cover,
               ),

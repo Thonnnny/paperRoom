@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/constants.dart';
+import 'package:freshbuyer/screens/tabbar/tabbar.dart';
 import 'package:lottie/lottie.dart';
 
 class WaitingOrder extends StatelessWidget {
@@ -37,7 +38,11 @@ class WaitingOrder extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/home');
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                const SafeArea(child: FRTabbarScreen())),
+                        (Route<dynamic> route) => false);
                   },
                   child: const Text('Ordenar ahora',
                       style: TextStyle(

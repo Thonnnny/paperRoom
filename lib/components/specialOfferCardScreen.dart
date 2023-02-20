@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:freshbuyer/constants.dart';
-import 'package:freshbuyer/model/productsInOffer.dart';
 
 class SpecialOfferCardWidget extends StatelessWidget {
   const SpecialOfferCardWidget(
@@ -10,7 +9,7 @@ class SpecialOfferCardWidget extends StatelessWidget {
     required this.index,
   }) : super(key: key);
 
-  final Offer data;
+  final dynamic data;
   final BuildContext context;
   final int index;
 
@@ -49,7 +48,7 @@ class SpecialOfferCardWidget extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "\$${data.price.toString()}",
+                          "\$${data['price'].toString()}",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
@@ -65,7 +64,7 @@ class SpecialOfferCardWidget extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "\$${data.offerPrice.toString()}",
+                          "\$${data['offerPrice'].toString()}",
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
@@ -78,7 +77,7 @@ class SpecialOfferCardWidget extends StatelessWidget {
                         SizedBox(
                           width: 150,
                           child: Text(
-                            data.name.toString(),
+                            data['name'].toString(),
                             textAlign: TextAlign.left,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -90,7 +89,7 @@ class SpecialOfferCardWidget extends StatelessWidget {
                         SizedBox(
                           width: 150,
                           child: Text(
-                            data.description.toString(),
+                            data['description'].toString(),
                             textAlign: TextAlign.left,
                             style: const TextStyle(
                                 fontWeight: FontWeight.w800,
@@ -114,7 +113,7 @@ class SpecialOfferCardWidget extends StatelessWidget {
                               borderRadius: BorderRadius.circular(30.0),
                               image: DecorationImage(
                                 image: NetworkImage(
-                                  data.mainImage.toString(),
+                                  data['mainImage'].toString(),
                                 ),
                                 fit: BoxFit.cover,
                               ),

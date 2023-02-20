@@ -44,9 +44,7 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
     const HomeScreen(
       title: '首页0',
     ),
-    const CartScreen(
-      product: [],
-    ),
+    const CartScreen(),
     const HistoryScreen(),
     const TestScreen(title: 'Orders'),
     const ProfileScreen(),
