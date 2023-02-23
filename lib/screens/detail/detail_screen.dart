@@ -56,6 +56,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -66,7 +67,8 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                 slivers: [
                   SliverAppBar(
                     pinned: true,
-                    expandedHeight: getProportionateScreenHeight(428),
+                    expandedHeight: size.height * 0.4,
+                    leadingWidth: size.width * 0.2,
                     leading: IconButton(
                       icon: Image.asset(
                         'assets/icons/back@2x.png',
@@ -275,7 +277,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   Widget _buldFloatBar(Product product) {
     buildAddCard() => Container(
           height: 58,
-          width: getProportionateScreenWidth(258),
+          width: 220,
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(29)),
             color: color5,

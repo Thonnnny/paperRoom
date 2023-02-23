@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/model/productsInOffer.dart';
 
@@ -16,6 +18,7 @@ class SpecialOfferWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: Row(
@@ -73,17 +76,27 @@ class SpecialOfferWidget extends StatelessWidget {
           ),
           SizedBox(width: 20),
           Container(
-            height: 180.0,
-            width: 180.0,
+            height: size.height * 0.4,
+            width: size.width * 0.4,
             decoration: BoxDecoration(
               color: color5, //PARA PROBAR CONTAINER
               borderRadius: BorderRadius.circular(15.0),
               image: DecorationImage(
-                image: NetworkImage(
+                image: CachedNetworkImageProvider(
                   data['mainImage'].toString(),
                 ),
                 fit: BoxFit.cover,
               ),
+            ),
+            child: CachedNetworkImage(
+              imageUrl: data['mainImage'].toString(),
+              placeholder: (context, url) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+              fadeInDuration: const Duration(milliseconds: 500),
+              fadeOutDuration: const Duration(milliseconds: 500),
+              fit: BoxFit.cover,
             ),
           ),
         ],

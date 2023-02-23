@@ -78,7 +78,11 @@ class _MostPopularScreenState extends State<MostPopularScreen> {
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");
         }
-        return const CircularProgressIndicator();
+        return const CircularProgressIndicator(
+          color: color6,
+          semanticsLabel: 'cargando...',
+          strokeWidth: 2.0,
+        );
       },
     );
   }

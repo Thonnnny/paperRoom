@@ -29,12 +29,12 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  flutter_launcher_icons: ^0.11.0
   art_sweetalert: ^0.0.5
   bloc: ^8.1.0
   bloc_provider: ^1.0.0
   cached_network_image: ^3.2.3
   cloud_firestore: ^4.1.0
+  connectivity_plus: ^3.0.3
   cupertino_icons: ^1.0.2
   date_format: ^2.0.7
   datetime_picker_formfield_new: ^2.0.0
@@ -47,6 +47,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.1
+  flutter_launcher_icons: ^0.11.0
   get: ^4.6.5
   http: ^0.13.5
   image_picker: ^0.8.6

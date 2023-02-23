@@ -129,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 slivers: [
                   SliverAppBar(
                     pinned: true,
-                    expandedHeight: getProportionateScreenHeight(428),
+                    expandedHeight: size.height * 0.5,
                     leading: IconButton(
                       icon: Image.asset(
                         'assets/icons/back@2x.png',

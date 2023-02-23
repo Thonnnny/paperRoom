@@ -94,7 +94,6 @@ class _FRTabbarScreenState extends State<FRTabbarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SizeConfig().init(context);
     return Container(
       color: color3,
       child: Scaffold(

@@ -44,7 +44,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? token = prefs.getString('sessiontoken');
-      if (token == null || token.isEmpty) {
+      if (token == null || token.isEmpty || token == 'null' || token == false) {
         // ignore: use_build_context_synchronously
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
@@ -70,9 +70,9 @@ class _HomeAppBarState extends State<HomeAppBar> {
         print(rsp);
         if (rsp['type'] == "success") {
           print('logout successful');
-          setState(() {
-            loginProvider.logOut();
-          });
+
+          loginProvider.logOut();
+
           // ignore: use_build_context_synchronously
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
@@ -86,6 +86,26 @@ class _HomeAppBarState extends State<HomeAppBar> {
             text: '${rsp['message']}',
             confirmBtnColor: Colors.green,
             confirmBtnText: 'Continuar',
+          );
+        } else {
+          print('this is a try  but a failed to logout');
+          setState(() {
+            loginProvider.logOut();
+          });
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: '${rsp['title']}',
+            text: '${rsp['message']}, no eres usuario registrado.',
+            confirmBtnColor: Colors.red,
+            confirmBtnText: 'Continuar',
+            onConfirmBtnTap: () {
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          const SafeArea(child: WelcomeScreen())),
+                  (Route<dynamic> route) => false);
+            },
           );
         }
       }

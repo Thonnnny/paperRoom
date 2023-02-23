@@ -105,8 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-
+    var size = MediaQuery.of(context).size;
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -117,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 slivers: [
                   SliverAppBar(
                     pinned: true,
-                    expandedHeight: getProportionateScreenHeight(428),
+                    expandedHeight: size.height * 0.4,
                     leading: IconButton(
                       icon: Image.asset(
                         'assets/icons/back@2x.png',
@@ -134,6 +133,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     flexibleSpace: FlexibleSpaceBar(
                       background: Container(
+                          height: 428,
+                          width: double.infinity,
                           color: color4,
                           child: Lottie.asset('assets/images/login.json')),
                     ),

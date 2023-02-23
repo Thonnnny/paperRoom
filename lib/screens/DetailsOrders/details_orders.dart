@@ -5,6 +5,8 @@ import 'package:freshbuyer/class/classActiveOrders.dart';
 import 'package:freshbuyer/components/app_bar.dart';
 import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/model/activeResponses.dart';
+import 'package:freshbuyer/screens/auth/login.dart';
+import 'package:freshbuyer/screens/tabbar/tabbar.dart';
 import 'package:lottie/lottie.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,42 +53,63 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> getActiveOrders() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('accesstoken');
-    var response = await BaseClient().get(RestApis.getActiveOrders,
-        {"Content-Type": "application/json", "accesstoken": token});
-    var rsp = jsonDecode(response);
-    if (rsp['type'] == 'success') {
-      List<dynamic> activeOrders = rsp['activeOrders'];
-      print('This is the response from the active orders screen');
-      print(activeOrders);
-      setState(() {
-        arrayhistory = activeOrders;
-      });
-      if (arrayhistory.isEmpty) {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('accesstoken');
+      if (token == null) {
         QuickAlert.show(
           context: context,
           type: QuickAlertType.error,
-          title: 'Oops...',
-          text: '${rsp['message']}',
+          title: 'Error',
+          text: 'Necesitas iniciar sesión para realizar esta acción',
           confirmBtnColor: Colors.red,
-          confirmBtnText: 'Reintentar',
+          confirmBtnText: 'Continuar',
+          onConfirmBtnTap: () {
+            Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        const SafeArea(child: FRTabbarScreen())),
+                (Route<dynamic> route) => false);
+          },
         );
       } else {
-        QuickAlert.show(
-          context: context,
-          type: QuickAlertType.success,
-          title: '${rsp['title']}',
-          text: '${rsp['message']}',
-          confirmBtnColor: Colors.green,
-          confirmBtnText: 'Continuar',
-        );
+        var response = await BaseClient().get(RestApis.getActiveOrders,
+            {"Content-Type": "application/json", "accesstoken": token});
+        var rsp = jsonDecode(response);
+        if (rsp['type'] == 'success') {
+          List<dynamic> activeOrders = rsp['activeOrders'];
+
+          setState(() {
+            arrayhistory = activeOrders;
+          });
+          if (arrayhistory.isEmpty) {
+            QuickAlert.show(
+              context: context,
+              type: QuickAlertType.error,
+              title: 'Oops...',
+              text: '${rsp['message']}',
+              confirmBtnColor: Colors.red,
+              confirmBtnText: 'Reintentar',
+            );
+          } else {
+            QuickAlert.show(
+              context: context,
+              type: QuickAlertType.success,
+              title: '${rsp['title']}',
+              text: '${rsp['message']}',
+              confirmBtnColor: Colors.green,
+              confirmBtnText: 'Continuar',
+            );
+          }
+        } else {
+          print('No hay ordenes activas');
+          setState(() {
+            arrayhistory = [];
+          });
+        }
       }
-    } else {
-      print('No hay ordenes activas');
-      setState(() {
-        arrayhistory = [];
-      });
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -112,28 +135,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       });
     }
   }
-
-  // Future<void> getDetailsOrder(arrayhistory) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String? token = prefs.getString('accesstoken');
-  //   var response = await BaseClient().get(
-  //       RestApis.getOrderDetails + arrayhistory,
-  //       {"Content-Type": "application/json", "accesstoken": token});
-  //   var rsp = jsonDecode(response);
-  //   if (rsp['type'] == 'success') {
-  //     List<dynamic> orderDetails = rsp['orderDetails'];
-  //     print('This is the response from the active orders Details screen');
-  //     print(orderDetails);
-  //     setState(() {
-  //       detailsOrder = orderDetails;
-  //     });
-  //   } else {
-  //     print('No hay ordenes activas');
-  //     setState(() {
-  //       detailsOrder = [];
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {

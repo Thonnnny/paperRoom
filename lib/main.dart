@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:freshbuyer/providers/login_provider.dart';
 import 'package:freshbuyer/providers/orders_provider.dart';
 import 'package:freshbuyer/providers/register_provider.dart';
+import 'package:freshbuyer/screens/auth/checkConnection.dart';
 
 import 'package:freshbuyer/screens/auth/validateToken.dart';
 import 'package:freshbuyer/screens/tabbar/tabbar.dart';
@@ -11,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'components/splash_screen.dart';
 
+final internetChecker = CheckInternetConnection();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //await PushNotificationService.initializeApp();
@@ -30,14 +32,12 @@ class PaperRoomApp extends StatefulWidget {
 
 class _PaperRoomAppState extends State<PaperRoomApp> {
   bool? validateUser;
+
   void getSaveToken() async {
     final prefs = await SharedPreferences.getInstance();
     final bool? saveToken = prefs.getBool('savetoken');
     validateUser = saveToken;
     print('This is the save token bool $validateUser');
-    if (validateUser == null) {
-      (BuildContext context) => const SplashScreen();
-    }
   }
 
   @override
@@ -57,11 +57,10 @@ class _PaperRoomAppState extends State<PaperRoomApp> {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Fresh-Buyer',
+        title: 'The Paper Room',
         theme: appTheme(),
-        initialRoute: validateUser == false && validateUser == null
-            ? '/login'
-            : '/home', //'/login', //'/home',
+        initialRoute:
+            validateUser != 'false' ? '/login' : '/home', //'/login', //'/home',
         routes: {
           '/login': (BuildContext context) => const SplashScreen(),
           '/home': (BuildContext context) =>

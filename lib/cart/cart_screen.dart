@@ -1,11 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:freshbuyer/class/classCart.dart';
-import 'package:freshbuyer/class/classCustomer.dart';
 import 'package:freshbuyer/components/productsInCart.dart';
 import 'package:freshbuyer/constants.dart';
-import 'package:freshbuyer/model/cartResponses.dart';
 import 'package:freshbuyer/screens/auth/login.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -13,15 +10,12 @@ import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../class/classAdress.dart';
-import '../class/classOnlyDetailsCart.dart';
 import '../components/app_button.dart';
 import '../components/app_text.dart';
 
 import '../components/splashorders_Screen.dart';
 import '../helpers/base_client.dart';
 import '../helpers/res_apis.dart';
-import '../model/customerResponse.dart';
 import '../providers/orders_provider.dart';
 import '../screens/tabbar/tabbar.dart';
 import '../screens/test/waitingOrders.dart';
@@ -258,6 +252,7 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     if (cartList.isEmpty) {
       return WaitingOrder();
     } else {
@@ -271,7 +266,7 @@ class _CartScreenState extends State<CartScreen> {
                   slivers: [
                     SliverAppBar(
                       pinned: true,
-                      expandedHeight: getProportionateScreenHeight(428),
+                      expandedHeight: size.height,
                       leading: IconButton(
                         icon: Image.asset(
                           'assets/icons/back@2x.png',
@@ -815,7 +810,7 @@ class _CartScreenState extends State<CartScreen> {
   Widget _buldFloatBar() {
     buildAddCard() => Container(
           height: 54,
-          width: getProportionateScreenWidth(200),
+          width: 200,
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(29)),
             color: Colors.green[500],

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:freshbuyer/components/special_offer_widget.dart';
 import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/model/productsInOffer.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../class/classProductsInOffer.dart';
@@ -57,92 +58,121 @@ class _SpecialOffersState extends State<SpecialOffers> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    return Column(
-      children: [
-        _buildTitle(),
-        _buildLine(),
-        const SizedBox(height: 24),
-        Stack(children: [
-          Container(
-            height: size.height * 0.45,
-            decoration: const BoxDecoration(
-              color: color3,
-              borderRadius: BorderRadius.all(Radius.circular(32)),
+    if (productInOfferList.isEmpty) {
+      return Center(
+        child: Card(
+          elevation: 5,
+          color: color2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Por los momentos no hay productos en oferta😊\nPronto tendremos ofertas!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                      width: size.width * 0.5,
+                      height: size.height * 0.3,
+                      child: Lottie.asset('assets/images/noProducts.json')),
+                ),
+              ],
             ),
-            child: PageView.builder(
-              itemBuilder: (context, index) {
-                if (productInOfferList.length == 0) {
-                  return const Center(child: CircularProgressIndicator());
-                } else {
+          ),
+        ),
+      );
+    } else {
+      return Column(
+        children: [
+          _buildTitle(),
+          _buildLine(),
+          const SizedBox(height: 24),
+          Stack(children: [
+            Container(
+              height: size.height * 0.45,
+              decoration: const BoxDecoration(
+                color: color3,
+                borderRadius: BorderRadius.all(Radius.circular(32)),
+              ),
+              child: PageView.builder(
+                itemBuilder: (context, index) {
                   final data = productInOfferList[index];
                   print('This is the data of Products in Offer: $data');
                   return SpecialOfferWidget(context, data: data, index: index);
-                }
-              },
-              itemCount: productInOfferList.length,
-              allowImplicitScrolling: true,
-              onPageChanged: (value) {
-                setState(() {
-                  selectIndex = value;
-                  items = productInOfferList.length;
-                });
-              },
+                },
+                itemCount: productInOfferList.length,
+                allowImplicitScrolling: true,
+                onPageChanged: (value) {
+                  setState(() {
+                    selectIndex = value;
+                    items = productInOfferList.length;
+                  });
+                },
+              ),
             ),
-          ),
-          buildPageIndicator(items),
-        ]),
-        const SizedBox(height: 24),
-        GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: categories.length,
-          scrollDirection: Axis.vertical,
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            mainAxisExtent: 100,
-            mainAxisSpacing: 24,
-            crossAxisSpacing: 10,
-            maxCrossAxisExtent: 100,
-          ),
-          itemBuilder: ((context, index) {
-            final data = categories[index];
-            return GestureDetector(
-              onTap: () {},
-              // Navigator.pushNamed(context, MostPopularScreen.route()),
-              child: Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: color2,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Image.asset(
-                        data.icon,
-                        width: 35,
-                        height: 35,
-                        color: color5,
-                        fit: BoxFit.cover,
+            buildPageIndicator(items),
+          ]),
+          const SizedBox(height: 24),
+          GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: categories.length,
+            scrollDirection: Axis.vertical,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              mainAxisExtent: 100,
+              mainAxisSpacing: 24,
+              crossAxisSpacing: 10,
+              maxCrossAxisExtent: 100,
+            ),
+            itemBuilder: ((context, index) {
+              final data = categories[index];
+              return GestureDetector(
+                onTap: () {},
+                // Navigator.pushNamed(context, MostPopularScreen.route()),
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: color2,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Image.asset(
+                          data.icon,
+                          width: 35,
+                          height: 35,
+                          color: color5,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  FittedBox(
-                    child: Text(
-                      data.title,
-                      style: const TextStyle(
-                          color: color3,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
+                    const SizedBox(height: 12),
+                    FittedBox(
+                      child: Text(
+                        data.title,
+                        style: const TextStyle(
+                            color: color3,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        )
-      ],
-    );
+                  ],
+                ),
+              );
+            }),
+          )
+        ],
+      );
+    }
   }
 
   Widget buildPageIndicator(int items) {

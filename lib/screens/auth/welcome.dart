@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:freshbuyer/size_config.dart';
 
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +16,7 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     // This size provide us total height and width of our screen
     return Scaffold(
       body: Background(
@@ -56,7 +58,9 @@ class WelcomeScreen extends StatelessWidget {
                         // ignore: prefer_const_constructors
                         return ChangeNotifierProvider(
                             create: (_) => LoginFormProvider(),
-                            child: const Scaffold(body: LoginScreen()));
+                            child: Container(
+                                height: size.height,
+                                child: const LoginScreen()));
                       },
                     ),
                   );
