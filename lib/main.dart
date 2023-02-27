@@ -1,4 +1,7 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:freshbuyer/components/noIntemertConnection.dart';
+import 'package:freshbuyer/constants.dart';
 import 'package:freshbuyer/providers/login_provider.dart';
 import 'package:freshbuyer/providers/orders_provider.dart';
 import 'package:freshbuyer/providers/register_provider.dart';
@@ -16,9 +19,21 @@ final internetChecker = CheckInternetConnection();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //await PushNotificationService.initializeApp();
+  final ConnectivityResult connectivityResult =
+      await Connectivity().checkConnectivity();
   ValidateToken validateToken = ValidateToken();
   await validateToken.handleSession();
-  runApp(const PaperRoomApp());
+  if (connectivityResult == ConnectivityResult.mobile ||
+      connectivityResult == ConnectivityResult.wifi) {
+    runApp(const PaperRoomApp());
+  } else {
+    runApp(MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'The Paper Room',
+        color: color4,
+        theme: appTheme(),
+        home: const NoInternetConnection()));
+  }
 }
 
 var prefs = SharedPreferences.getInstance();
@@ -59,8 +74,9 @@ class _PaperRoomAppState extends State<PaperRoomApp> {
         debugShowCheckedModeBanner: false,
         title: 'The Paper Room',
         theme: appTheme(),
-        initialRoute:
-            validateUser != 'false' ? '/login' : '/home', //'/login', //'/home',
+        initialRoute: validateUser != 'false' || validateUser == null
+            ? '/login'
+            : '/home', //'/login', //'/home',
         routes: {
           '/login': (BuildContext context) => const SplashScreen(),
           '/home': (BuildContext context) =>

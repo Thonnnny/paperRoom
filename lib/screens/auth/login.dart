@@ -279,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
             color: color6,
             size: 30,
           ),
-          hintText: "Usuario",
+          hintText: "Email",
           hintStyle: const TextStyle(
               color: color2,
               fontSize: 15,

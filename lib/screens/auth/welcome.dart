@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:freshbuyer/size_config.dart';
 
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -11,9 +10,14 @@ import '../../providers/login_provider.dart';
 import '../tabbar/tabbar.dart';
 import 'login.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;

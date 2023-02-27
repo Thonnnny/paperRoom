@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:freshbuyer/constants.dart';
+import 'package:lottie/lottie.dart';
 import '../screens/auth/welcome.dart';
 
 class SplashScreen extends StatefulWidget {

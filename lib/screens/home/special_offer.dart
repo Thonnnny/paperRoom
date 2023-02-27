@@ -75,7 +75,7 @@ class _SpecialOffersState extends State<SpecialOffers> {
                 const Text(
                   'Por los momentos no hay productos en oferta😊\nPronto tendremos ofertas!',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
